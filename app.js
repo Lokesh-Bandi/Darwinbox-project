@@ -9,7 +9,6 @@ var url = "mongodb://localhost:27017/FullAssignment";
 let dbcon;
 var ObjectId = require("mongodb").ObjectId;
 const MongoStore = require('connect-mongo');
-const { ObjectID } = require('bson');
 const ObjectIdGen = function () {
     return ObjectId();
 }
@@ -17,8 +16,8 @@ const ObjectIdGen = function () {
 var app = express();
 
 app.use(logger('tiny'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.json()); 
+app.use(express.urlencoded({ extended: false }));  //to use the req.body variable when the html form is submitted
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/edit', express.static(path.join(__dirname, 'public')));
@@ -54,7 +53,7 @@ app.post('/task/:id/:id1/:id2?', (req, res) => {
     var taskid = req.params.id2;
     if (mode == "create") {
         var taskObj = {
-            "achieverID": ObjectID(empid),
+            "achieverID": ObjectId(empid),
             "achieverName": req.body.achieverName,
             "taskTitle": req.body.taskTitle,
             "taskDesc": req.body.taskDesc,
@@ -67,7 +66,7 @@ app.post('/task/:id/:id1/:id2?', (req, res) => {
         })
     }
     else if (mode == "alive") {
-        dbcon.collection('tasksDB').updateOne({ _id: ObjectID(taskid) }, { $set: { taskStatus: true } }, (err, res1) => {
+        dbcon.collection('tasksDB').updateOne({ _id: ObjectId(taskid) }, { $set: { taskStatus: true } }, (err, res1) => {
             if (err) throw err;
             res.redirect("/displayData/employees/" + empid);
         })
@@ -127,10 +126,22 @@ app.get('/restore/:id', (req, res) => {
     // })
 })
 app.get('/trash', (req, res) => {
-    dbcon.collection('trashbin').find({}).toArray((err, res1) => {
-        if (err) throw err;
-        res.render('index', { tableArray: res1, name: req.session.name, mode: "trashbin" });
-    })
+
+    //async await concept
+
+    
+    fetchData();
+    async function fetchData(){
+        var trashbinData=await dbcon.collection('trashbin').find({}).toArray();
+        res.render('index',{tableArray: trashbinData,name: req.session.name, mode: "trashbin"})
+    }
+
+    //with out async await concept 
+
+    // dbcon.collection('trashbin').find({}).toArray((err, res1) => {
+    //     if (err) throw err;
+    //     res.render('index', { tableArray: res1, name: req.session.name, mode: "trashbin" });
+    // })
 })
 app.get('/displayData/:id/:id1', (req, res) => {
     if (req.params.id == "trashbin") {
@@ -154,7 +165,7 @@ app.get('/displayData/:id/:id1', (req, res) => {
             })
         })
         const taskPromiseFind = new Promise((resolve, reject) => {
-            dbcon.collection('tasksDB').find({ achieverID: ObjectID(req.params.id1) }).toArray((err, res1) => {
+            dbcon.collection('tasksDB').find({ achieverID: ObjectId(req.params.id1) }).toArray((err, res1) => {
                 if (err) {
                     reject(err);
                 }
