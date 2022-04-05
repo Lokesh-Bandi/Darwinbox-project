@@ -16,7 +16,7 @@ const ObjectIdGen = function () {
 var app = express();
 
 app.use(logger('tiny'));
-app.use(express.json()); 
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));  //to use the req.body variable when the html form is submitted
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -45,7 +45,7 @@ MongoClient.connect(url, function (err, db) {
 });
 
 app.get("/register", (req, res) => {
-    res.render('register',{errDesc:""});
+    res.render('register', { errDesc: "" });
 })
 app.post('/task/:id/:id1/:id2?', (req, res) => {
     var mode = req.params.id;
@@ -88,7 +88,7 @@ app.get('/restore/:id', (req, res) => {
     });
     trashPromiseFind.then((result) => {
         const empPromiseInsert = new Promise((resolve, reject) => {
-            dbcon.collection('employees').insertOne(result, (err, res1) => {
+            dbcon.collection('EmployeeDetails').insertOne(result, (err, res1) => {
                 if (err) {
                     reject(err);
                 }
@@ -129,11 +129,11 @@ app.get('/trash', (req, res) => {
 
     //async await concept
 
-    
+
     fetchData();
-    async function fetchData(){
-        var trashbinData=await dbcon.collection('trashbin').find({}).toArray();
-        res.render('index',{tableArray: trashbinData,name: req.session.name, mode: "trashbin"})
+    async function fetchData() {
+        var trashbinData = await dbcon.collection('trashbin').find({}).toArray();
+        res.render('index', { tableArray: trashbinData, name: req.session.name, mode: "trashbin" })
     }
 
     //with out async await concept 
@@ -155,7 +155,7 @@ app.get('/displayData/:id/:id1', (req, res) => {
         // Running Queries using promises(enhances the asynchronous execution)
 
         const empPromiseFind = new Promise((resolve, reject) => {
-            dbcon.collection('employees').findOne({ _id: ObjectId(req.params.id1) }, (err, res1) => {
+            dbcon.collection('EmployeeDetails').findOne({ _id: ObjectId(req.params.id1) }, (err, res1) => {
                 if (err) {
                     reject(err);
                 }
@@ -191,7 +191,7 @@ app.get('/displayData/:id/:id1', (req, res) => {
 })
 app.get('/edit/:id', (req, res) => {
     const empPromiseFind = new Promise((resolve, reject) => {
-        dbcon.collection('employees').findOne({ _id: ObjectId(req.params.id) }, (err, res1) => {
+        dbcon.collection('EmployeeDetails').findOne({ _id: ObjectId(req.params.id) }, (err, res1) => {
             if (err) {
                 reject(err);
             }
@@ -240,7 +240,7 @@ app.get('/delete/:id/:id1', (req, res) => {
         // Running Queries using promises(enhances the asynchronous execution)
 
         const empPromiseFind = new Promise((resolve, reject) => {
-            dbcon.collection('employees').findOne({ _id: ObjectId(req.params.id1) }, (err, res1) => {
+            dbcon.collection('EmployeeDetails').findOne({ _id: ObjectId(req.params.id1) }, (err, res1) => {
                 if (err) {
                     reject(err);
                 }
@@ -261,7 +261,7 @@ app.get('/delete/:id/:id1', (req, res) => {
                 })
             });
             const empPromiseDelete = new Promise((resolve, reject) => {
-                dbcon.collection('employees').deleteOne({ _id: ObjectId(req.params.id1) }, (err, res1) => {
+                dbcon.collection('EmployeeDetails').deleteOne({ _id: ObjectId(req.params.id1) }, (err, res1) => {
                     if (err) {
                         reject(err);
                     }
@@ -294,7 +294,7 @@ app.get('/delete/:id/:id1', (req, res) => {
 
 app.get('/data', (req, res) => {
     if (req.session.auth == true) {
-        dbcon.collection('employees').find({}).toArray((err, res1) => {
+        dbcon.collection('EmployeeDetails').find({}).toArray((err, res1) => {
             if (err) throw err;
             res.render('index', { tableArray: res1, name: req.session.name, mode: "employees" });
         })
@@ -305,7 +305,7 @@ app.get('/data', (req, res) => {
 
 })
 app.get('/', (req, res) => {
-    res.render('login',{errDesc:""});
+    res.render('login', { errDesc: "" });
 })
 app.get('/form', (req, res) => {
     if (req.session.auth == true) {
@@ -320,18 +320,18 @@ app.get('/form', (req, res) => {
     }
 })
 app.post('/', (req, res) => {
-    dbcon.collection("users").findOne({email:req.body.email},(err,res1)=>{
-        if(err) throw err;
-        if(!res1){
-            res.render('login',{errDesc:"Inavlid User!"})
+    dbcon.collection("users").findOne({ email: req.body.email }, (err, res1) => {
+        if (err) throw err;
+        if (!res1) {
+            res.render('login', { errDesc: "Inavlid User!" })
         }
-        else{
-            if (req.body.password!=res1.password){
-                res.render('login',{errDesc:"Inavlid Password!"})
+        else {
+            if (req.body.password != res1.password) {
+                res.render('login', { errDesc: "Inavlid Password!" })
             }
-            else{
+            else {
                 req.session.auth = true;
-                req.session.name=res1.name;
+                req.session.name = res1.name;
                 res.redirect("/data")
             }
         }
@@ -340,24 +340,54 @@ app.post('/', (req, res) => {
 app.post('/save', (req, res) => {
     if (req.session.auth) {
         var empObject = {
-            "id": req.body.id,
-            "ename": req.body.ename,
-            "des": req.body.des,
-            "loc": req.body.loc,
-            "jd": req.body.jd,
-            "dept": req.body.dept
+            "EmpID": req.body.EmpID,
+            "Employee_Name":req.body.Employee_Name ,
+            "MarriedID":req.body.MarriedID,
+            "MaritalStatusID": req.body.MaritalStatusID,
+            "GenderID":req.body.GenderID ,
+            "EmpStatusID":req.body.EmpStatusID ,
+            "DeptID": req.body.DeptID,
+            "PerfScoreID": req.body.PerfScoreID,
+            "FromDiversityJobFairID": req.body.FromDiversityJobFairID,
+            "Salary":req.body.Salary ,
+            "Termd": req.body.Termd,
+            "PositionID": req.body.PositionID,
+            "Position": req.body.Position,
+            "State": req.body.State,
+            "Zip": req.body.Zip,
+            "DOB":req.body. DOB,
+            "Sex": req.body.Sex,
+            "MaritalDesc": req.body.MaritalDesc,
+            "CitizenDesc":req.body.CitizenDesc ,
+            "HispanicLatino": req.body.HispanicLatino,
+            "RaceDesc": req.body.RaceDesc,
+            "DateofHire":req.body.DateofHire,
+            "DateofTermination":req.body.DateofTermination ,
+            "TermReason": req.body.TermReason,
+            "EmploymentStatus": req.body.EmploymentStatus,
+            "Department":req.body.Department,
+            "ManagerName":req.body.ManagerName ,
+            "ManagerID": req.body.ManagerID,
+            "RecruitmentSource":req.body.RecruitmentSource,
+            "PerformanceScore":req.body.PerformanceScore ,
+            "EngagementSurvey":req.body.EngagementSurvey ,
+            "EmpSatisfaction": req.body.EmpSatisfaction,
+            "SpecialProjectsCount":req.body.SpecialProjectsCount ,
+            "LastPerformanceReview_Date":req.body.LastPerformanceReview_Date ,
+            "DaysLateLast30":req.body.DaysLateLast30 ,
+            "Absences": req.body.Absences
+
         }
+
         if (req.body.monid) {
-            dbcon.collection("employees").updateOne({ "_id": ObjectId(req.body.monid) }, { $set: empObject }, function (err, res1) {
+            dbcon.collection("EmployeeDetails").updateOne({ "_id": ObjectId(req.body.monid) }, { $set: empObject }, function (err, res1) {
                 if (err) throw err;
                 console.log("1 document Updated");
                 res.redirect("/data")
             });
         }
         else {
-            const newId = ObjectIdGen();
-            empObject._id = newId;
-            dbcon.collection("employees").insertOne(empObject, function (err, res1) {
+            dbcon.collection("EmployeeDetails").insertOne(empObject, function (err, res1) {
                 if (err) throw err;
                 console.log("1 document inserted");
                 res.redirect("/data")
@@ -387,8 +417,8 @@ app.post("/registerSave", (req, res) => {
                         "name": req.body.ename,
                         "email": req.body.email,
                         "password": req.body.password,
-                        }
-                    dbcon.collection('users').insertOne(newUser,(err,res1)=>{
+                    }
+                    dbcon.collection('users').insertOne(newUser, (err, res1) => {
                         req.session.auth = true;
                         req.session.name = req.body.ename;
                         res.redirect('/data')

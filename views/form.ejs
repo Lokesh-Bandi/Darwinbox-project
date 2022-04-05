@@ -864,57 +864,15 @@
                   <h3 class="card-title">Employee Form</h3>
                 </div>
                 <div class="card-body">
-                  <label for="id">Employee ID :</label>
-                  <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fa fa-id-card"></i></span>
+                  <% for(var [x,y] of Object.entries(editObject)) { %>
+                    <% if(x=="_id") { 
+                      continue;
+                    }  %> 
+                    <label for="<%= x %>"><%= x %> :</label>
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control" id="<%= x %>" placeholder="<%= x %>" name="<%= x %>" value="<%= y %>">
                     </div>
-                    <input type="text" class="form-control" id="id" placeholder="EmployeeId" name="id" value="<%= editObject.id %>">
-                  </div>
-                  <label for="ename">Employee Name :</label>
-                  <div class="input-group mb-3">
-                    <input type="text" class="form-control" id="ename" placeholder="Employee Name" name="ename" value="<%= editObject.ename %>">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa fa-user"></i></span>
-                    </div>
-                  </div>
-                  <label for="des">Designation :</label>
-                  <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fa fa-briefcase"></i></span>
-                    </div>
-                    <input type="text" class="form-control" id="des" placeholder="Designation" name="des" value="<%= editObject.des %>">
-                  </div>
-                  <label for="loc">Working Location :</label>
-                  <div class="input-group mb-3">
-                    <input type="text" class="form-control" id="loc" placeholder="Working Location" name="loc" value="<%= editObject.loc %>">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa fa-map-marker"></i></span>
-                      </div>
-                  </div>
-                  <label for="jd">Joining Date :</label>
-                  <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fa fa-calendar"></i></span>
-                    </div>
-                    <input type="text" class="form-control" id="jd" placeholder="Joining Date" name="jd" value="<%= editObject.jd %>">
-                  </div>
-                  <label for="dept">Department :</label>
-                  <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                      <span class="input-group-text"><i class="fa fa-building"></i></span>
-                    </div>
-                    <select name="dept" id="dept" class="form-control mr-3">
-                      <option value="">None</option>
-                      <% for(let i=0;i<depts.length;i++){ %>
-                        <% if(editObject.dept==depts[i].name){ %>
-                          <option value="<%= depts[i].name %>" selected><%= depts[i].name %></option>
-                        <% } else { %>
-                          <option value="<%= depts[i].name %>"><%= depts[i].name %></option>
-                        <% } %>
-                      <% } %>
-                    </select>
-                  </div>
+                    <% } %>
                   <input type="hidden" id="monid" name="monid" value="<%= editObject._id %>">
                   <div class="d-flex justify-content-center align-items-center">
                   <button type="submit" class="btn btn-primary mr-3">Submit</button>

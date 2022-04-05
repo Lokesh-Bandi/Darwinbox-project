@@ -900,38 +900,39 @@
                   </div>
                   <!-- /.card-header -->
                   <div class="card-body">
-                    <table id="example2" class="table table-bordered table-hover">
+                    <table id="example2" class="table table-bordered table-hover table-responsive">
                       <thead>
-                        <tr>
+                        <tr class="table-info">
                           <th>EmployeeId</th>
-                          <th>Employee Name</th>
-                          <th>Designation</th>
-                          <th>Workinng Location</th>
-                          <th>Joining Date</th>
-                          <th>Department</th>
+                          <th style="width: 18%">Employee Name</th>
+                          <th style="width: 20%" >Designation</th>
+                          <th>Manager Name</th>
+                          <th style="width: 10%">Joining Date</th>
+                          <th >Department</th>
                           <th>Customization</th>
+                          
                         </tr>
                       </thead>
                       <tbody>
                         <% for(var i=0;i<tableArray.length;i++) { %>
                           <tr id="<%=tableArray[i]._id %>">
                             <td>
-                              <%=tableArray[i].id%>
+                              <%=tableArray[i].EmpID%>
                             </td>
                             <td><a href="/displayData/<%= mode %>/<%= tableArray[i]._id %>">
-                                <%=tableArray[i].ename%>
+                                <%=tableArray[i].Employee_Name%>
                               </a></td>
                             <td>
-                              <%=tableArray[i].des%>
+                              <%=tableArray[i].Position%>
                             </td>
                             <td>
-                              <%=tableArray[i].loc%>
+                              <%=tableArray[i].ManagerName%>
                             </td>
                             <td>
-                              <%=tableArray[i].jd%>
+                              <%=tableArray[i].DateofHire%>
                             </td>
                             <td>
-                              <%=tableArray[i].dept%>
+                              <%=tableArray[i].Department%>
                             </td>
                             <% if(mode=="employees" ){ %>
                               <td>
@@ -955,17 +956,6 @@
                           </tr>
                           <%}%>
                       </tbody>
-                      <tfoot>
-                        <tr>
-                          <th>EmployeeId</th>
-                          <th>Employee Name</th>
-                          <th>Designation</th>
-                          <th>Workinng Location</th>
-                          <th>Joining Date</th>
-                          <th>Department</th>
-                          <th>Customization</th>
-                        </tr>
-                      </tfoot>
                     </table>
                     <% if(mode=="employees" ){ %>
                       <div class="card-footer d-flex justify-content-center align-items-center">
@@ -1029,19 +1019,19 @@
     <!-- AdminLTE App -->
     <script src="dist/js/adminlte.js"></script>
 
-    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-    <script src="../../plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-    <script src="../../plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-    <script src="../../plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-    <script src="../../plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-    <script src="../../plugins/jszip/jszip.min.js"></script>
-    <script src="../../plugins/pdfmake/pdfmake.min.js"></script>
-    <script src="../../plugins/pdfmake/vfs_fonts.js"></script>
-    <script src="../../plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-    <script src="../../plugins/datatables-buttons/js/buttons.print.min.js"></script>
-    <script src="../../plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
-    <script src="../../dist/js/adminlte.min.js"></script>
+    <script src="plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <script src="plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="plugins/jszip/jszip.min.js"></script>
+    <script src="plugins/pdfmake/pdfmake.min.js"></script>
+    <script src="plugins/pdfmake/vfs_fonts.js"></script>
+    <script src="plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <script src="plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="dist/js/adminlte.min.js"></script>
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
     <script src="dist/js/pages/dashboard.js"></script>
     <!-- <script src="javascripts/displayDetails.js"></script> -->
@@ -1055,7 +1045,7 @@
           "ordering": true,
           "info": true,
           "autoWidth": false,
-          "responsive": true,
+          "responsive": false,
         });
       });
       $("tr").click(function () {
