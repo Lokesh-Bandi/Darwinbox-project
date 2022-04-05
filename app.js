@@ -44,6 +44,47 @@ MongoClient.connect(url, function (err, db) {
 
 });
 
+app.get("/agt",(req,res)=>{
+    var pipeline=[
+        {
+          '$match': {}
+        }, {
+          '$group': {
+            '_id': '$ManagerName', 
+            'Count': {
+              '$sum': 1
+            }
+          }
+        }, {
+          '$limit': 6
+        }
+      ];
+    
+    var labels=[]
+    var dataSet=[]
+    var resultPromise=new Promise((resolve,reject)=>{
+        dbcon.collection("EmployeeDetails").aggregate(pipeline).toArray((err,res1)=>{
+            if(err){
+                reject(err)
+            }
+            else{
+                resolve(res1)
+            }
+        });
+    })
+    resultPromise.then((result)=>{
+        console.log(typeof(result))
+        result.forEach((res1)=>{
+            labels.push(res1['_id'])
+            dataSet.push(res1['Count'])
+        })
+        console.log(labels)
+        console.log(dataSet)
+        res.render('charts',{labels:labels,dataSet:dataSet,name:req.session.name})
+    })
+    
+    
+})
 app.get("/register", (req, res) => {
     res.render('register', { errDesc: "" });
 })
