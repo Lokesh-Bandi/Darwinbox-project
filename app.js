@@ -9,6 +9,7 @@ var url = "mongodb://localhost:27017/FullAssignment";
 let dbcon;
 var ObjectId = require("mongodb").ObjectId;
 const MongoStore = require('connect-mongo');
+const { resolve } = require('path');
 const ObjectIdGen = function () {
     return ObjectId();
 }
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/edit', express.static(path.join(__dirname, 'public')));
 app.use('/displayData/employees', express.static(path.join(__dirname, 'public')));
 app.use('/displayData/trashbin', express.static(path.join(__dirname, 'public')));
+app.use('/CompareAnalytics', express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs')
 app.set('trust proxy', 1) // trust first proxy
 app.use(session({
@@ -38,56 +40,119 @@ app.use(session({
     }
     )
 }))
+
+
 MongoClient.connect(url, function (err, db) {
     if (err) throw err;
     dbcon = db.db("FullAssignment");
 
 });
 
-app.get("/agt",(req,res)=>{
-    var pipeline=[
-        {
-          '$match': {}
-        }, {
-          '$group': {
-            '_id': '$ManagerName', 
-            'Count': {
-              '$sum': 1
+
+
+app.get('/home', (req, res) => {
+    res.render('home', { name: req.session.name });
+})
+
+
+
+app.get("/CompareAnalytics/:id", (req, res) => {
+
+    var avgResults = []
+    var dataSet = []
+    var promises = []
+
+    var labels = ['EmpSatisfaction', 'SpecialProjectsCount', 'DaysLateLast30', 'Absences'];
+    for (var x of labels) {
+        var avgPipeline = [
+            {
+                '$match': {}
+            }, {
+                '$group': {
+                    '_id': null,
+                    'Average': {
+                        '$avg': '$' + x,
+                    }
+                }
             }
-          }
-        }, {
-          '$limit': 6
-        }
-      ];
-    
-    var labels=[]
-    var dataSet=[]
-    var resultPromise=new Promise((resolve,reject)=>{
-        dbcon.collection("EmployeeDetails").aggregate(pipeline).toArray((err,res1)=>{
-            if(err){
+        ];
+        promises.push(new Promise((resolve, reject) => {
+            dbcon.collection("EmployeeDetails").aggregate(avgPipeline).toArray((err, res1) => {
+                if (err) {
+                    reject(err)
+                }
+                else {
+                    resolve(res1[0]['Average'])
+                }
+            });
+        }));
+    }
+    var ownResultPromise=new Promise((resolve, reject) => {
+        dbcon.collection("EmployeeDetails").findOne({ _id: ObjectId(req.params.id) }, { projection: { _id:0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1)=>{
+            if (err) {
                 reject(err)
             }
-            else{
+            else {
+                resolve(res1)
+            }
+        })
+    })
+    ownResultPromise.then((val)=>{
+        dataSet=Object.values(val);
+    })
+    promises.push(ownResultPromise)
+    Promise.all(promises).then((res1) => {
+        avgResults=res1;
+        res.render('compareCharts',{labels:labels,dataSet:dataSet,name:req.session.name,avgResults:avgResults})
+    })
+})
+
+
+
+app.get("/analytics", (req, res) => {
+    var pipeline = [
+        {
+            '$match': {}
+        }, {
+            '$group': {
+                '_id': '$' + req.query.analyticsType,
+                'Count': {
+                    '$sum': 1
+                }
+            }
+        }
+    ];
+    var labels = []
+    var dataSet = []
+    var resultPromise = new Promise((resolve, reject) => {
+        dbcon.collection("EmployeeDetails").aggregate(pipeline).toArray((err, res1) => {
+            if (err) {
+                reject(err)
+            }
+            else {
                 resolve(res1)
             }
         });
     })
-    resultPromise.then((result)=>{
-        console.log(typeof(result))
-        result.forEach((res1)=>{
+    resultPromise.then((result) => {
+        result.forEach((res1) => {
             labels.push(res1['_id'])
             dataSet.push(res1['Count'])
         })
         console.log(labels)
         console.log(dataSet)
-        res.render('charts',{labels:labels,dataSet:dataSet,name:req.session.name})
+        res.render('charts', { labels: labels, dataSet: dataSet, name: req.session.name })
     })
-    
-    
 })
+
+
+
 app.get("/register", (req, res) => {
     res.render('register', { errDesc: "" });
 })
+
+
+
 app.post('/task/:id/:id1/:id2?', (req, res) => {
     var mode = req.params.id;
     var empid = req.params.id1;
@@ -113,6 +178,9 @@ app.post('/task/:id/:id1/:id2?', (req, res) => {
         })
     }
 })
+
+
+
 app.get('/restore/:id', (req, res) => {
 
     // Running Queries using promises(enhances the asynchronous execution)
@@ -166,6 +234,11 @@ app.get('/restore/:id', (req, res) => {
     //     })
     // })
 })
+
+
+
+
+
 app.get('/trash', (req, res) => {
 
     //async await concept
@@ -230,6 +303,11 @@ app.get('/displayData/:id/:id1', (req, res) => {
         // })
     }
 })
+
+
+
+
+
 app.get('/edit/:id', (req, res) => {
     const empPromiseFind = new Promise((resolve, reject) => {
         dbcon.collection('EmployeeDetails').findOne({ _id: ObjectId(req.params.id) }, (err, res1) => {
@@ -269,6 +347,10 @@ app.get('/edit/:id', (req, res) => {
 
 
 })
+
+
+
+
 app.get('/delete/:id/:id1', (req, res) => {
     if (req.params.id == "trashbin") {
         dbcon.collection('trashbin').deleteOne({ "_id": ObjectId(req.params.id1) }, (err, res1) => {
@@ -333,6 +415,8 @@ app.get('/delete/:id/:id1', (req, res) => {
 
 });
 
+
+
 app.get('/data', (req, res) => {
     if (req.session.auth == true) {
         dbcon.collection('EmployeeDetails').find({}).toArray((err, res1) => {
@@ -345,9 +429,17 @@ app.get('/data', (req, res) => {
     }
 
 })
+
+
+
+
 app.get('/', (req, res) => {
     res.render('login', { errDesc: "" });
 })
+
+
+
+
 app.get('/form', (req, res) => {
     if (req.session.auth == true) {
         dbcon.collection('departments').find({}).toArray((err, res1) => {
@@ -360,6 +452,10 @@ app.get('/form', (req, res) => {
         res.render('unauthorized')
     }
 })
+
+
+
+
 app.post('/', (req, res) => {
     dbcon.collection("users").findOne({ email: req.body.email }, (err, res1) => {
         if (err) throw err;
@@ -373,49 +469,52 @@ app.post('/', (req, res) => {
             else {
                 req.session.auth = true;
                 req.session.name = res1.name;
-                res.redirect("/data")
+                res.redirect("/home")
             }
         }
     })
 })
+
+
+
 app.post('/save', (req, res) => {
     if (req.session.auth) {
         var empObject = {
             "EmpID": req.body.EmpID,
-            "Employee_Name":req.body.Employee_Name ,
-            "MarriedID":req.body.MarriedID,
+            "Employee_Name": req.body.Employee_Name,
+            "MarriedID": req.body.MarriedID,
             "MaritalStatusID": req.body.MaritalStatusID,
-            "GenderID":req.body.GenderID ,
-            "EmpStatusID":req.body.EmpStatusID ,
+            "GenderID": req.body.GenderID,
+            "EmpStatusID": req.body.EmpStatusID,
             "DeptID": req.body.DeptID,
             "PerfScoreID": req.body.PerfScoreID,
             "FromDiversityJobFairID": req.body.FromDiversityJobFairID,
-            "Salary":req.body.Salary ,
+            "Salary": req.body.Salary,
             "Termd": req.body.Termd,
             "PositionID": req.body.PositionID,
             "Position": req.body.Position,
             "State": req.body.State,
             "Zip": req.body.Zip,
-            "DOB":req.body. DOB,
+            "DOB": req.body.DOB,
             "Sex": req.body.Sex,
             "MaritalDesc": req.body.MaritalDesc,
-            "CitizenDesc":req.body.CitizenDesc ,
+            "CitizenDesc": req.body.CitizenDesc,
             "HispanicLatino": req.body.HispanicLatino,
             "RaceDesc": req.body.RaceDesc,
-            "DateofHire":req.body.DateofHire,
-            "DateofTermination":req.body.DateofTermination ,
+            "DateofHire": req.body.DateofHire,
+            "DateofTermination": req.body.DateofTermination,
             "TermReason": req.body.TermReason,
             "EmploymentStatus": req.body.EmploymentStatus,
-            "Department":req.body.Department,
-            "ManagerName":req.body.ManagerName ,
+            "Department": req.body.Department,
+            "ManagerName": req.body.ManagerName,
             "ManagerID": req.body.ManagerID,
-            "RecruitmentSource":req.body.RecruitmentSource,
-            "PerformanceScore":req.body.PerformanceScore ,
-            "EngagementSurvey":req.body.EngagementSurvey ,
+            "RecruitmentSource": req.body.RecruitmentSource,
+            "PerformanceScore": req.body.PerformanceScore,
+            "EngagementSurvey": req.body.EngagementSurvey,
             "EmpSatisfaction": req.body.EmpSatisfaction,
-            "SpecialProjectsCount":req.body.SpecialProjectsCount ,
-            "LastPerformanceReview_Date":req.body.LastPerformanceReview_Date ,
-            "DaysLateLast30":req.body.DaysLateLast30 ,
+            "SpecialProjectsCount": req.body.SpecialProjectsCount,
+            "LastPerformanceReview_Date": req.body.LastPerformanceReview_Date,
+            "DaysLateLast30": req.body.DaysLateLast30,
             "Absences": req.body.Absences
 
         }
@@ -439,6 +538,10 @@ app.post('/save', (req, res) => {
         res.render('unauthorized')
     }
 })
+
+
+
+
 app.post("/registerSave", (req, res) => {
 
     dbcon.collection('users').findOne({ email: req.body.email }, (err, res1) => {
@@ -471,12 +574,21 @@ app.post("/registerSave", (req, res) => {
     })
 
 })
+
+
+
+
 app.post('/unauthorized', (req, res) => {
     res.redirect('/')
 })
+
+
 app.get('/logout', (req, res) => {
     req.session.destroy(function () {
         res.redirect('/')
     })
 })
+
+
+
 module.exports = app;
