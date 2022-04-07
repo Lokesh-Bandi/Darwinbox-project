@@ -442,9 +442,9 @@ app.get('/', (req, res) => {
 
 app.get('/form', (req, res) => {
     if (req.session.auth == true) {
-        dbcon.collection('departments').find({}).toArray((err, res1) => {
+        dbcon.collection('EmployeeDetails').find({}).sort({EmpID:-1}).limit(1).toArray((err, res1) => {
             if (err) throw err;
-            res.render('form', { name: req.session.name, "editObject": {}, depts: res1, mode: "newForm" })
+            res.render('form', { name: req.session.name, "EmpID": res1[0].EmpID+1, mode: "newForm" })
         })
 
     }
@@ -480,8 +480,8 @@ app.post('/', (req, res) => {
 app.post('/save', (req, res) => {
     if (req.session.auth) {
         var empObject = {
-            "EmpID": req.body.EmpID,
             "Employee_Name": req.body.Employee_Name,
+            "EmpID": parseInt(req.body.EmpID),
             "MarriedID": req.body.MarriedID,
             "MaritalStatusID": req.body.MaritalStatusID,
             "GenderID": req.body.GenderID,
@@ -527,6 +527,7 @@ app.post('/save', (req, res) => {
             });
         }
         else {
+            empObject.Employee_Name=req.body.fname+", "+req.body.lname;
             dbcon.collection("EmployeeDetails").insertOne(empObject, function (err, res1) {
                 if (err) throw err;
                 console.log("1 document inserted");
