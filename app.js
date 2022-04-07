@@ -5,11 +5,14 @@ var logger = require('morgan');
 var session = require('express-session');
 const { v4: uuidv4 } = require('uuid');
 var MongoClient = require('mongodb').MongoClient;
+const MongoStore = require('connect-mongo');
+var bcrypt = require('bcryptjs');
+var ObjectId = require("mongodb").ObjectId;
+
 var url = "mongodb://localhost:27017/FullAssignment";
 let dbcon;
-var ObjectId = require("mongodb").ObjectId;
-const MongoStore = require('connect-mongo');
-const { resolve } = require('path');
+
+
 const ObjectIdGen = function () {
     return ObjectId();
 }
@@ -34,11 +37,10 @@ app.use(session({
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 30000000 },
+    cookie: { maxAge: 300000 },
     store: MongoStore.create({
         mongoUrl: url,
-    }
-    )
+    }),
 }))
 
 
@@ -51,7 +53,13 @@ MongoClient.connect(url, function (err, db) {
 
 
 app.get('/home', (req, res) => {
-    res.render('home', { name: req.session.name });
+    console.log(req.session)
+    if(req.session.auth){
+        res.render('home', { name: req.session.name });
+    }
+    else{
+        res.render('unauthorized')
+    }
 })
 
 
@@ -87,8 +95,8 @@ app.get("/CompareAnalytics/:id", (req, res) => {
             });
         }));
     }
-    var ownResultPromise=new Promise((resolve, reject) => {
-        dbcon.collection("EmployeeDetails").findOne({ _id: ObjectId(req.params.id) }, { projection: { _id:0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1)=>{
+    var ownResultPromise = new Promise((resolve, reject) => {
+        dbcon.collection("EmployeeDetails").findOne({ _id: ObjectId(req.params.id) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1) => {
             if (err) {
                 reject(err)
             }
@@ -97,13 +105,13 @@ app.get("/CompareAnalytics/:id", (req, res) => {
             }
         })
     })
-    ownResultPromise.then((val)=>{
-        dataSet=Object.values(val);
+    ownResultPromise.then((val) => {
+        dataSet = Object.values(val);
     })
     promises.push(ownResultPromise)
     Promise.all(promises).then((res1) => {
-        avgResults=res1;
-        res.render('compareCharts',{labels:labels,dataSet:dataSet,name:req.session.name,avgResults:avgResults})
+        avgResults = res1;
+        res.render('compareCharts', { labels: labels, dataSet: dataSet, name: req.session.name, avgResults: avgResults })
     })
 })
 
@@ -434,6 +442,7 @@ app.get('/data', (req, res) => {
 
 
 app.get('/', (req, res) => {
+    req.session.auth=false;
     res.render('login', { errDesc: "" });
 })
 
@@ -442,9 +451,9 @@ app.get('/', (req, res) => {
 
 app.get('/form', (req, res) => {
     if (req.session.auth == true) {
-        dbcon.collection('EmployeeDetails').find({}).sort({EmpID:-1}).limit(1).toArray((err, res1) => {
+        dbcon.collection('EmployeeDetails').find({}).sort({ EmpID: -1 }).limit(1).toArray((err, res1) => {
             if (err) throw err;
-            res.render('form', { name: req.session.name, "EmpID": res1[0].EmpID+1, mode: "newForm" })
+            res.render('form', { name: req.session.name, "EmpID": res1[0].EmpID + 1, mode: "newForm" })
         })
 
     }
@@ -463,14 +472,18 @@ app.post('/', (req, res) => {
             res.render('login', { errDesc: "Inavlid User!" })
         }
         else {
-            if (req.body.password != res1.password) {
-                res.render('login', { errDesc: "Inavlid Password!" })
-            }
-            else {
-                req.session.auth = true;
-                req.session.name = res1.name;
-                res.redirect("/home")
-            }
+            var passMatch=bcrypt.compare(req.body.password,res1.password);
+            passMatch.then((val)=>{
+                if (!val) {
+                    res.render('login', { errDesc: "Inavlid Password!" })
+                }
+                else {
+                    req.session.auth = true;
+                    req.session.name = res1.name;
+                    res.redirect("/home")
+                }
+            })
+            
         }
     })
 })
@@ -527,7 +540,7 @@ app.post('/save', (req, res) => {
             });
         }
         else {
-            empObject.Employee_Name=req.body.fname+", "+req.body.lname;
+            empObject.Employee_Name = req.body.fname + ", " + req.body.lname;
             dbcon.collection("EmployeeDetails").insertOne(empObject, function (err, res1) {
                 if (err) throw err;
                 console.log("1 document inserted");
@@ -563,11 +576,16 @@ app.post("/registerSave", (req, res) => {
                         "email": req.body.email,
                         "password": req.body.password,
                     }
-                    dbcon.collection('users').insertOne(newUser, (err, res1) => {
-                        req.session.auth = true;
-                        req.session.name = req.body.ename;
-                        res.redirect('/data')
+                    var passHash = bcrypt.hash(newUser.password, 10);
+                    passHash.then((val) => {
+                        newUser.password = val;
+                        dbcon.collection('users').insertOne(newUser, (err, res1) => {
+                            req.session.auth = true;
+                            req.session.name = req.body.ename;
+                            res.redirect('/data')
+                        })
                     })
+
                 }
 
             }
