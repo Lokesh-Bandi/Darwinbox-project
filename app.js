@@ -37,7 +37,7 @@ app.use(session({
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 300000 },
+    cookie: { maxAge: 3000000 },
     store: MongoStore.create({
         mongoUrl: url,
     }),
@@ -54,10 +54,10 @@ MongoClient.connect(url, function (err, db) {
 
 app.get('/home', (req, res) => {
     console.log(req.session)
-    if(req.session.auth){
+    if (req.session.auth) {
         res.render('home', { name: req.session.name });
     }
-    else{
+    else {
         res.render('unauthorized')
     }
 })
@@ -442,7 +442,7 @@ app.get('/data', (req, res) => {
 
 
 app.get('/', (req, res) => {
-    req.session.auth=false;
+    req.session.auth = false;
     res.render('login', { errDesc: "" });
 })
 
@@ -472,8 +472,8 @@ app.post('/', (req, res) => {
             res.render('login', { errDesc: "Inavlid User!" })
         }
         else {
-            var passMatch=bcrypt.compare(req.body.password,res1.password);
-            passMatch.then((val)=>{
+            var passMatch = bcrypt.compare(req.body.password, res1.password);
+            passMatch.then((val) => {
                 if (!val) {
                     res.render('login', { errDesc: "Inavlid Password!" })
                 }
@@ -483,7 +483,7 @@ app.post('/', (req, res) => {
                     res.redirect("/home")
                 }
             })
-            
+
         }
     })
 })
@@ -495,19 +495,19 @@ app.post('/save', (req, res) => {
         var empObject = {
             "Employee_Name": req.body.Employee_Name,
             "EmpID": parseInt(req.body.EmpID),
-            "MarriedID": req.body.MarriedID,
-            "MaritalStatusID": req.body.MaritalStatusID,
-            "GenderID": req.body.GenderID,
+            "MarriedID":(req.body.MaritalDesc=='Married')?1:0,
+            "MaritalStatusID":(req.body.MaritalDesc=='Single')?1:0 ,
+            "GenderID": (req.body.Sex=="F")?1:0,
             "EmpStatusID": req.body.EmpStatusID,
             "DeptID": req.body.DeptID,
             "PerfScoreID": req.body.PerfScoreID,
             "FromDiversityJobFairID": req.body.FromDiversityJobFairID,
-            "Salary": req.body.Salary,
+            "Salary": req.body.Salary??"NA",
             "Termd": req.body.Termd,
             "PositionID": req.body.PositionID,
             "Position": req.body.Position,
-            "State": req.body.State,
-            "Zip": req.body.Zip,
+            "State": req.body.State??"NA",
+            "Zip": req.body.Zip??"NA",
             "DOB": req.body.DOB,
             "Sex": req.body.Sex,
             "MaritalDesc": req.body.MaritalDesc,
@@ -558,39 +558,45 @@ app.post('/save', (req, res) => {
 
 app.post("/registerSave", (req, res) => {
 
-    dbcon.collection('users').findOne({ email: req.body.email }, (err, res1) => {
-        if (err) {
-            console.log("No")
-        }
-        else {
-            if (res1) {
-                res.render('register', { errDesc: "Username Already Exists" })
+    if (req.body.ename.match(/[0-9]/)) {
+        res.render('register', { errDesc: "Only alphabets are in Full Name field" })
+    }
+    else {
+        dbcon.collection('users').findOne({ email: req.body.email }, (err, res1) => {
+            if (err) {
+                console.log("No")
             }
             else {
-                if (req.body.password != req.body.cPassword) {
-                    res.render('register', { errDesc: "Password mismatch" })
+                if (res1) {
+                    res.render('register', { errDesc: "Username Already Exists" })
                 }
                 else {
-                    var newUser = {
-                        "name": req.body.ename,
-                        "email": req.body.email,
-                        "password": req.body.password,
+                    if (req.body.password != req.body.cPassword) {
+                        res.render('register', { errDesc: "Password mismatch" })
                     }
-                    var passHash = bcrypt.hash(newUser.password, 10);
-                    passHash.then((val) => {
-                        newUser.password = val;
-                        dbcon.collection('users').insertOne(newUser, (err, res1) => {
-                            req.session.auth = true;
-                            req.session.name = req.body.ename;
-                            res.redirect('/data')
+                    else {
+                        var newUser = {
+                            "name": req.body.ename,
+                            "email": req.body.email,
+                            "password": req.body.password,
+                        }
+                        var passHash = bcrypt.hash(newUser.password, 10);
+                        passHash.then((val) => {
+                            newUser.password = val;
+                            dbcon.collection('users').insertOne(newUser, (err, res1) => {
+                                req.session.auth = true;
+                                req.session.name = req.body.ename;
+                                res.redirect('/data')
+                            })
                         })
-                    })
+
+                    }
 
                 }
-
             }
-        }
-    })
+        })
+    }
+
 
 })
 

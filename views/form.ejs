@@ -34,11 +34,12 @@
 
     <nav class="main-header navbar navbar-expand-lg navbar-light bg-info">
       <i class="fa fa-home fa-lg"></i><a class="navbar-brand" href="/home">Home</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
     </nav>
-    
+
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
       <!-- Brand Logo -->
       <a href="index3.html" class="brand-link">
@@ -96,13 +97,13 @@
         <div class="container">
           <div class="row justify-content-center">
             <div class="col-11">
-              
-                <div class="card card-info m-3">
-                  <div class="card-header">
-                    <h3 class="card-title">Employee Form</h3>
-                  </div>
-                  <div class="card-body">
-                    <form action="/save" method="post" >
+
+              <div class="card card-info m-3">
+                <div class="card-header">
+                  <h3 class="card-title">Employee Form</h3>
+                </div>
+                <div class="card-body">
+                  <form action="/save" method="post">
                     <% if(mode=="editable" ){ %>
                       <% for(var [x,y] of Object.entries(editObject)) { %>
                         <% if(x=="_id" ) { continue; } %>
@@ -119,93 +120,154 @@
                               <button type="submit" class="btn btn-primary mr-3">Submit</button>
                               <button type="reset" class="btn btn-secondary">Reset</button>
                             </div>
-                     <% } %>
-                    </form>
-                    <% if(mode=="newForm"){ %>
-                                <form action="/save" method="post" onsubmit="event.preventDefault(); validateForm()">
-                                  <div class="form-row">
-                                    <div class="col-md-6 mb-3 offset-md-3">
-                                      <label for="EmpID">EmpID</label>
-                                      <input type="text" class="form-control" id="EmpID" name="EmpID"
-                                        placeholder="EmpID" value="<%= EmpID %>" readonly>
-                                    </div>
-                                  </div>
-                                  <div class="form-row">
-                                    <div class="col-md-6 mb-3">
-                                      <label for="fname">First name <span class="text-danger">*</span></label>
-                                      <input type="text" class="form-control" id="fname" name="fname"
-                                        placeholder="First name" value="">
-                                      <small class="text-danger" id="fErr"></small>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                      <label for="lname">Last name <span class="text-danger">*</span></label>
-                                      <input type="text" class="form-control" id="lname" name="lname"
-                                        placeholder="Last name" value="">
-                                        <small class="text-danger" id="lErr"></small>
-                                    </div>
-                                  </div>
-                                  <div class="form-row">
-                                    <div class="col-md-6 mb-3">
-                                      <label for="Position">Designation <span class="text-danger">*</span></label>
-                                        <select class="form-control" id="Position" name="Position" >
-                                          <option value="None">None</option>
-                                          <option value="Accountant I">Accountant I</option>
-                                          <option value="Administrative Assistant">Administrative Assistant</option>
-                                          <option value="IT Director">IT Director</option>
-                                          <option value="Production Technician I">Production Technician I</option>
-                                          <option value="Production Technician II">Production Technician II</option>
-                                          <option value="Sales Manager">Sales Manager</option>
-                                          <option value="Senior BI Developer">Senior BI Developer</option>
-                                        </select>
-                                        <small class="text-danger" id="posErr"></small>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                      <label for="ManagerName">Manager Name <span class="text-danger">*</span></label>
-                                        <select class="form-control" id="ManagerName" name="ManagerName" >
-                                          <option value="None">None</option>
-                                          <option value="Amy Dunn">Amy Dunn</option>
-                                          <option value="Board of Directors">Board of Directors</option>
-                                          <option value="Brandon R. LeBlanc">Brandon R. LeBlanc</option>
-                                          <option value="Brannon Miller">Brannon Miller</option>
-                                          <option value="Kelley Spirea">Kelley Spirea</option>
-                                          <option value="Jennifer Zamora">Jennifer Zamora</option>
-                                          <option value="Eric Dougall">Eric Dougall</option>
-                                          <option value="Elijiah Gray">Elijiah Gray</option>
-                                          <option value="Alex Sweetwater">Alex Sweetwater</option>
-                                        </select>
-                                        <small class="text-danger" id="mgrErr"></small>
-                                    </div>
-                                  </div>
-                                  <div class="form-row">
-                                    <div class="col-md-6 mb-3">
-                                      <label for="DateofHire">Joining Data <span class="text-danger">*</span></label>
-                                      <input type="date" class="form-control" id="DateofHire" name="DateofHire"
-                                        placeholder="Date of Hire">
-                                        <small class="text-danger" id="jdErr"></small>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                      <label for="Department">Department <span class="text-danger">*</span></label>
-                                        <select class="form-control" id="Department" name="Department" >
-                                          <option value="None">None</option>
-                                          <option value="Admin Offices">Admin Offices</option>
-                                          <option value="Executive Office">Executive Office</option>
-                                          <option value="IT/IS">IT/IS</option>
-                                          <option value="Production"">Production"</option>
-                                          <option value="Sales">Sales</option>
-                                          <option value="Software Engineering">Software Engineering</option>
-                                        </select>
-                                        <small class="text-danger" id="deptErr"></small>
-                                    </div>
-                                  </div>
-                                  <div class="justify-content-center">
-                                  <button class="btn btn-primary" type="submit">Submit form</button>
-                                </div>
-                                </form>
-                        <% } %>
+                            <% } %>
+                  </form>
+                  <% if(mode=="newForm" ){ %>
+                    <form action="/save" method="post"onsubmit="return validateForm()">
+                      <div class="form-row">
+                        <div class="col-md-6 mb-3 offset-md-3">
+                          <label for="EmpID">EmpID</label>
+                          <input type="text" class="form-control" id="EmpID" name="EmpID" placeholder="EmpID"
+                            value="<%= EmpID %>" readonly>
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div class="err col-md-6 mb-3">
+                          <label for="fname">First name <span class="text-danger">*</span></label>
+                          <input type="text" class="form-control" id="fname" name="fname" placeholder="First name"
+                            onchange="validateField('fname','fErr')">
+                          <small class="text-danger" id="fErr"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label for="lname">Last name <span class="text-danger">*</span></label>
+                          <input type="text" class="form-control" id="lname" name="lname" placeholder="Last name"
+                            onchange="validateField('lname','lErr')">
+                          <small class="text-danger" id="lErr"></small>
+                        </div>
+                      </div>
 
-                  </div>
-                  <!-- /.card-body -->
+                      <div class="form-row">
+                        <div class="col-md-6 mb-3">
+                          <label for="DateofHire">Gender <span class="text-danger">*</span></label><br>
+                          <div class="row">
+                            <div class="col-3 offset-md-3">
+                              <input type="radio"  id="male" name="Sex" placeholder="Gender" value="M" checked>  Male
+                            </div>
+                            <div class="col-6">
+                              <input type="radio"  id="female" name="Sex" value="F" placeholder="Gender">  Female
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label for="Department">Marital Status <span class="text-danger">*</span></label>
+                          <div class="row">
+                            <div class="col-3 offset-md-1">
+                              <input type="radio"  id="single" name="MaritalDesc" value="Single" checked>  Single
+                            </div>
+                            <div class="col-3 offset-md-1">
+                              <input type="radio"  id="married" name="MaritalDesc" value="Married" >  Married
+                            </div>
+                            <div class="col-3 offset-md-1">
+                              <input type="radio"  id="separated" name="MaritalDesc" value="Separated" >  Separated
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <div class="form-row">
+                        <div class="col-md-6 mb-3">
+                          <label for="Position">Designation <span class="text-danger">*</span></label>
+                          <select class="form-control" id="Position" name="Position"
+                            onchange="validateField('Position','posErr')">
+                            <option value="None" selected>None</option>
+                            <option value="Accountant I">Accountant I</option>
+                            <option value="Administrative Assistant">Administrative Assistant</option>
+                            <option value="IT Director">IT Director</option>
+                            <option value="Production Technician I">Production Technician I</option>
+                            <option value="Production Technician II">Production Technician II</option>
+                            <option value="Sales Manager">Sales Manager</option>
+                            <option value="Senior BI Developer">Senior BI Developer</option>
+                          </select>
+                          <small class="text-danger" id="posErr"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label for="ManagerName">Manager Name <span class="text-danger">*</span></label>
+                          <select class="form-control" id="ManagerName" name="ManagerName"
+                            onchange="validateField('ManagerName','mgrErr')">
+                            <option value="None">None</option>
+                            <option value="Amy Dunn">Amy Dunn</option>
+                            <option value="Board of Directors">Board of Directors</option>
+                            <option value="Brandon R. LeBlanc">Brandon R. LeBlanc</option>
+                            <option value="Brannon Miller">Brannon Miller</option>
+                            <option value="Kelley Spirea">Kelley Spirea</option>
+                            <option value="Jennifer Zamora">Jennifer Zamora</option>
+                            <option value="Eric Dougall">Eric Dougall</option>
+                            <option value="Elijiah Gray">Elijiah Gray</option>
+                            <option value="Alex Sweetwater">Alex Sweetwater</option>
+                          </select>
+                          <small class="text-danger" id="mgrErr"></small>
+                        </div>
+                      </div>
+
+
+                      <div class="form-row">
+                        <div class="col-md-6 mb-3">
+                          <label for="DateofHire">Joining Data <span class="text-danger">*</span></label>
+                          <input type="date" class="form-control" id="DateofHire" name="DateofHire"
+                            placeholder="Date of Hire" onchange="validateField('DateofHire','jdErr')">
+                          <small class="text-danger" id="jdErr"></small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label for="Department">Department <span class="text-danger">*</span></label>
+                          <select class="form-control" id="Department" name="Department"
+                            onchange="validateField('Department','deptErr')">
+                            <option value="None">None</option>
+                            <option value="Admin Offices">Admin Offices</option>
+                            <option value="Executive Office">Executive Office</option>
+                            <option value="IT/IS">IT/IS</option>
+                            <option value="Production"">Production" </option>
+                            <option value="Sales">Sales</option>
+                            <option value="Software Engineering">Software Engineering</option>
+                          </select>
+                          <small class="text-danger" id="deptErr"></small>
+                        </div>
+                      </div>
+
+
+                      <div class="form-row">
+                        <div class="err col-md-6 mb-3">
+                          <label for="fname">Employee Satisfaction </label>
+                          <input type="text" class="form-control" id="EmpSatisfaction" name="EmpSatisfaction" value="0"
+                            readonly>
+
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label for="lname">Special Projects Count </label>
+                          <input type="text" class="form-control" id="SpecialProjectsCount" name="SpecialProjectsCount"
+                            value="0" readonly>
+                        </div>
+                      </div>
+                      <div class="form-row">
+                        <div class="err col-md-6 mb-3">
+                          <label for="fname">Days Late in Last 30</label>
+                          <input type="text" class="form-control" id="DaysLateLast30" name="DaysLateLast30" value="0"
+                            readonly>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                          <label for="lname">Absences </label>
+                          <input type="text" class="form-control" id="Absences" name="Absences" value="0" readonly>
+                        </div>
+                      </div>
+                      <div class="justify-content-center">
+                        <button class="btn btn-primary" type="submit">Submit form</button>
+                      </div>
+                    </form>
+                    <% } %>
+
                 </div>
+                <!-- /.card-body -->
+              </div>
             </div>
             <!-- /.col -->
           </div>

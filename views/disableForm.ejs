@@ -34,11 +34,12 @@
 
     <nav class="main-header navbar navbar-expand-lg navbar-light bg-info">
       <i class="fa fa-home fa-lg"></i><a class="navbar-brand" href="/home">Home</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
     </nav>
-    
+
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
       <!-- Brand Logo -->
       <a href="#" class="brand-link">
@@ -76,69 +77,47 @@
       </div>
       <!-- /.sidebar -->
     </aside>
-    <!-- Content Wrapper. Contains page content -->
+
     <div class="content-wrapper">
-      <!-- Content Header (Page header) -->
       <div class="content-header">
         <div class="container-fluid">
           <div class="row mb-2">
             <div class="col-sm-4">
               <h1 class="m-0">Dashboard</h1>
-            </div><!-- /.col -->
-            <div class="col-md-3 offset-md-5">
-              <button class="btn btn-warning" onclick="window.location.href='/CompareAnalytics/<%= editObject._id %>'">ANALYTICS REPORT</button>
+            </div>
+            <div class="col-md-5 offset-md-3">
+              <button class="btn btn-warning"
+                onclick="window.location.href='/CompareAnalytics/<%= editObject._id %>'">ANALYTICS REPORT</button>
+              <button id="taskStatusButton" class="btn btn-warning">Task Status</button>
               <button class="btn btn-danger" onclick="window.location.href='/logout'">Logout</button>
-            </div><!-- /.col -->
-          </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+            </div>
+          </div>
+        </div>
       </div>
-      <!-- /.content-header -->
+
+
       <section class="content">
         <div class="container">
+
+          <!-- Task Management -->
           <div class="row justify-content-center">
-            <div class="col-8 ">
-              <form action="/save" method="post">
-                <div class="card card-info m-3">
-                  <div class="card-header">
-                    <h3 class="card-title">Employee Details</h3>
-                  </div>
-                  <div class="card-body">
-                    <% for(var [x,y] of Object.entries(editObject)) { %>
-                      <% if(x=="_id") { 
-                        continue;
-                      }  %> 
-                      <label for="<%= x %>"><%= x %> :</label>
-                      <div class="card">
-                        <input type="text" class="form-control" id="<%= x %>" placeholder="<%= x %>" name="<%= x %>" value="<%= y %>" readonly>
-                      </div>
-                      <% } %>
-                    <input type="hidden" id="monid" name="monid" value="<%= editObject._id %>">
-
-                  </div>
-                  <!-- /.card-body -->
-                </div>
-              </form>
-              <div class="d-flex justify-content-center align-items-center m-2">
-                <button id="taskStatusButton" class="btn btn-primary">Task Status</button>
-              </div>
-            </div>
-
             <div class="container">
               <div class="row">
                 <div class="col-md-2 offset-md-3">
                   <div class="d-flex justify-content-center align-items-center">
-                    <button id="taskAliveButton" class="btn btn-warning " style="display:none;">Tasks Alive</button>
+                    <button id="taskAliveButton" class="btn btn-primary " style="display:none;">Tasks Alive</button>
                   </div>
                 </div>
                 <div class="col-md-2">
                   <div class=" mr-2 ml-2">
-                    <button id="taskFinishedButton" class="btn btn-success" style="display:none;">Tasks Finised</button>
+                    <button id="taskFinishedButton" class="btn btn-primary" style="display:none;">Tasks
+                      Finised</button>
                   </div>
 
                 </div>
                 <div class="col-md-2">
                   <div class="d-flex ">
-                    <button id="createTaskBtn" class="btn btn-info" style="display:none;">Create Task</button>
+                    <button id="createTaskBtn" class="btn btn-primary" style="display:none;">Create Task</button>
                   </div>
                 </div>
               </div>
@@ -150,28 +129,29 @@
                 </div>
                 <% for(var i=0;i<tasks.length;i++) { %>
                   <% if(tasks[i].taskStatus==false) { %>
-                  <div class="col-4">
-                    <div class="card" style="background-color:darkgrey;">
-                      <div class="card-header">
-                        <h5 class="card-title">
-                          <%= tasks[i].taskTitle %>
-                        </h5>
-                      </div>
-                      <div class="card-body" style="background-color:white;">
-                        <h6 class="card-subtitle mb-2 text-muted">Not Yet Finished</h6>
-                        <p class="card-text">
-                          <%= tasks[i].taskDesc %>
-                        </p>
-                      </div>
-                      <form action="/task/alive/<%= tasks[i].achieverID %>/<%= tasks[i]._id %>" method="post">
-                        <div class="card-footer d-flex justify-content-center align-items-center btn-sm " style="background-color:white;">
-                          <button type="submit"" class="btn btn-primary">Finishe</button>
+                    <div class="col-4">
+                      <div class="card" style="background-color:darkgrey;">
+                        <div class="card-header">
+                          <h5 class="card-title">
+                            <%= tasks[i].taskTitle %>
+                          </h5>
                         </div>
-                      </form>
+                        <div class="card-body" style="background-color:white;">
+                          <h6 class="card-subtitle mb-2 text-muted">Not Yet Finished</h6>
+                          <p class="card-text">
+                            <%= tasks[i].taskDesc %>
+                          </p>
+                        </div>
+                        <form action="/task/alive/<%= tasks[i].achieverID %>/<%= tasks[i]._id %>" method="post">
+                          <div class="card-footer d-flex justify-content-center align-items-center btn-sm "
+                            style="background-color:white;">
+                            <button type="submit"" class=" btn btn-primary">Finish</button>
+                          </div>
+                        </form>
+                      </div>
                     </div>
-                  </div>
-                  <%}%>
-                  <%}%>
+                    <%}%>
+                      <%}%>
               </div>
 
               <!-- task finished -->
@@ -181,23 +161,23 @@
                 </div>
                 <% for(var i=0;i<tasks.length;i++) { %>
                   <% if(tasks[i].taskStatus==true) { %>
-                  <div class="col-4">
-                    <div class="card" style="background-color:darkgrey;">
-                      <div class="card-header">
-                        <h5 class="card-title">
-                          <%= tasks[i].taskTitle %>
-                        </h5>
-                      </div>
-                      <div class="card-body" style="background-color:white;">
-                        <h6 class="card-subtitle mb-2 text-muted">Not Yet Finished</h6>
-                        <p class="card-text">
-                          <%= tasks[i].taskDesc %>
-                        </p>
+                    <div class="col-4">
+                      <div class="card" style="background-color:darkgrey;">
+                        <div class="card-header">
+                          <h5 class="card-title">
+                            <%= tasks[i].taskTitle %>
+                          </h5>
+                        </div>
+                        <div class="card-body" style="background-color:white;">
+                          <h6 class="card-subtitle mb-2 text-muted">Not Yet Finished</h6>
+                          <p class="card-text">
+                            <%= tasks[i].taskDesc %>
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <%}%>
-                  <%}%>
+                    <%}%>
+                      <%}%>
               </div>
 
               <!-- tasks create -->
@@ -235,30 +215,53 @@
               </div>
             </div>
           </div>
-          <!-- /.col -->
-        </div>
-        <!-- /.row -->
-    </div>
-    <!-- /.container-fluid -->
-    </section>
-    <!-- /.content -->
-  </div>
-  <!-- /.content-wrapper -->
-  <footer class="main-footer">
-    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">Analytics.io</a>.</strong>
-    All rights reserved.
-    <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> 3.2.0
-    </div>
-  </footer>
 
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
-  </aside>
-  <!-- /.control-sidebar -->
+          <!-- Form Details -->
+          <div class="row justify-content-center">
+            <div class="col-12">
+              <form action="/save" method="post">
+                <div class="card card-info m-3">
+                  <div class="card-header">
+                    <h3 class="card-title">Employee Details</h3>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <% for(var [x,y] of Object.entries(editObject)) { %>
+                        <% if(x=="_id" ) { continue; } %>
+                          <div class="col-4">
+                            <label for="<%= x %>">
+                              <%= x %> :
+                            </label>
+                            <div class="card ">
+                              <input type="text" class="form-control" id="<%= x %>" placeholder="<%= x %>"
+                                name="<%= x %>" value="<%= y %>" readonly>
+                            </div>
+                          </div>
+
+                          <% } %>
+                    </div>
+
+                    <input type="hidden" id="monid" name="monid" value="<%= editObject._id %>">
+
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <footer class="main-footer">
+      <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">Analytics.io</a>.</strong>
+      All rights reserved.
+      <div class="float-right d-none d-sm-inline-block">
+        <b>Version</b> 3.2.0
+      </div>
+    </footer>
   </div>
-  <!-- ./wrapper -->
+
+
   <script src="plugins/jquery/jquery.min.js"></script>
   <!-- jQuery UI 1.11.4 -->
   <script src="plugins/jquery-ui/jquery-ui.min.js"></script>
@@ -314,43 +317,43 @@
           $("#finishedPanel").hide()
           $("#alivePanel").hide();
           $("#createPanel").show();
-          flag2[1]=0;
-          flag2[0]=1;
-          flag2[2]=1
+          flag2[1] = 0;
+          flag2[0] = 1;
+          flag2[2] = 1
         }
-        else{
+        else {
           $("#createPanel").hide();
-          flag2[1]=1;
+          flag2[1] = 1;
         }
-        
+
       })
       $("#taskFinishedButton").click(function () {
         if (flag2[2] == 1) {
           $("#alivePanel").hide();
           $("#createPanel").hide();
           $("#finishedPanel").show()
-          flag2[2]=0;
-          flag2[0]=1;
-          flag2[1]=1;
+          flag2[2] = 0;
+          flag2[0] = 1;
+          flag2[1] = 1;
         }
-        else{
+        else {
           $("#finishedPanel").hide();
-          flag2[2]=1;
+          flag2[2] = 1;
         }
-        
+
       })
       $("#taskAliveButton").click(function () {
         if (flag2[0] == 1) {
           $("#finishedPanel").hide()
           $("#createPanel").hide();
           $("#alivePanel").show();
-          flag2[0]=0;
-          flag2[1]=1
-          flag2[2]=1
+          flag2[0] = 0;
+          flag2[1] = 1
+          flag2[2] = 1
         }
-        else{
+        else {
           $("#alivePanel").hide();
-          flag2[0]=1;
+          flag2[0] = 1;
         }
 
       })

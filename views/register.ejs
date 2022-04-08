@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Employee Details</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="plugins/fontawesome-free/css/all.min.css">
   <!-- Ionicons -->
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <!-- Tempusdominus Bootstrap 4 -->
@@ -19,8 +17,6 @@
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <!-- overlayScrollbars -->
   <link rel="stylesheet" href="plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
-  <!-- Daterange picker -->
-  <link rel="stylesheet" href="plugins/daterangepicker/daterangepicker.css">
   <!-- summernote -->
   <link rel="stylesheet" href="plugins/summernote/summernote-bs4.min.css">
   <link rel="stylesheet" href="./stylesheets/styles.css">
@@ -71,7 +67,6 @@
   </aside>
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-    <!-- /.content-header -->
     <section class="vh-100" >
         <div class="mask d-flex align-items-center h-100 gradient-custom-3">
           <div class="container h-100">
@@ -84,24 +79,24 @@
                     <form action="/registerSave" method="post">
       
                       <div class="form-outline mb-2">
-                        <label class="form-label" for="ename">Your Name</label>
+                        <label class="form-label" for="ename">Full Name <span class="text-danger">*</span></label>
                         <input type="text" id="ename" name="ename" class="form-control form-control-lg"  placeholder="Enter Name"/>
                       </div>
       
                       <div class="form-outline mb-2">
-                        <label class="form-label" for="email">Your Email</label>
+                        <label class="form-label" for="email">Email <span class="text-danger">*</span></label>
                         <input type="email" id="email" name="email" class="form-control form-control-lg" placeholder="Enter Email"/>
                        
                       </div>
       
                       <div class="form-outline mb-2">
-                        <label class="form-label" for="password">Password</label>
+                        <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
                         <input type="password" id="password" name="password" class="form-control form-control-lg" placeholder="Enter password"/>
                         
                       </div>
       
                       <div class="form-outline mb-2">
-                        <label class="form-label" for="cPassword">confirm your password</label>
+                        <label class="form-label" for="cPassword">Confirm Password <span class="text-danger">*</span></label>
                         <input type="password" id="cPassword" name="cPassword" class="form-control form-control-lg" placeholder="Confirm Password" />
                         
                       </div>
@@ -131,11 +126,6 @@
       <b>Version</b> 3.2.0
     </div>
   </footer>
-
-  <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark">
-    <!-- Control sidebar content goes here -->
-  </aside>
   <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
