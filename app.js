@@ -559,7 +559,7 @@ app.post('/save', (req, res) => {
 app.post("/registerSave", (req, res) => {
 
     if (req.body.ename.match(/[0-9]/)) {
-        res.render('register', { errDesc: "Only alphabets are in Full Name field" })
+        res.render('register', { errDesc: "Only alphabets are allowed in Full Name field" })
     }
     else {
         dbcon.collection('users').findOne({ email: req.body.email }, (err, res1) => {
