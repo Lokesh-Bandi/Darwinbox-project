@@ -50,6 +50,65 @@ MongoClient.connect(url, function (err, db) {
 
 });
 
+app.post("/validateIDs", (req, res) => {
+    var empPromise = new Promise((resolve, reject) => {
+        dbcon.collection('EmployeeDetails').findOne({ EmpID: parseInt(req.body.empID) }, (err, res1) => {
+            if (err) {
+                reject(err)
+            }
+            else {
+                resolve(res1)
+            }
+        })
+    })
+    empPromise.then((val) => {
+        if(val!=null){
+            res.json(
+                {
+                    errMsg:"",
+                }
+            )
+        }
+        if (val == null) {
+            res.json(
+                {
+                    errMsg: "Employee_ID doesn't exists"
+
+                }
+            )
+        }
+        
+
+    })
+})
+app.post("/1vs1Analytics", (req, res) => {
+
+    var labels = ['EmpSatisfaction', 'SpecialProjectsCount', 'DaysLateLast30', 'Absences'];
+
+    var emp1Promise = new Promise((resolve, reject) => {
+        dbcon.collection('EmployeeDetails').findOne({ EmpID: parseInt(req.body.emp1) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1) => {
+            if (err) {
+                reject(err)
+            }
+            else {
+                resolve(res1)
+            }
+        })
+    })
+    var emp2Promise = new Promise((resolve, reject) => {
+        dbcon.collection('EmployeeDetails').findOne({ EmpID: parseInt(req.body.emp2) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1) => {
+            if (err) {
+                reject(err)
+            }
+            else {
+                resolve(res1)
+            }
+        })
+    })
+    Promise.all([emp1Promise, emp2Promise]).then((val) => {
+        res.render('compareCharts', { labels: labels, dataSet: Object.values(val[0]), name: req.session.name, avgResults: Object.values(val[1]), mode: "1vs1Compare", emp1_Id: req.body.emp1, emp2_Id: req.body.emp2 })
+    })
+})
 
 
 app.get('/home', (req, res) => {
@@ -111,7 +170,8 @@ app.get("/CompareAnalytics/:id", (req, res) => {
     promises.push(ownResultPromise)
     Promise.all(promises).then((res1) => {
         avgResults = res1;
-        res.render('compareCharts', { labels: labels, dataSet: dataSet, name: req.session.name, avgResults: avgResults })
+        typeof (avgResults)
+        res.render('compareCharts', { labels: labels, dataSet: dataSet, name: req.session.name, avgResults: avgResults, mode: "avgCompare" })
     })
 })
 
@@ -495,19 +555,19 @@ app.post('/save', (req, res) => {
         var empObject = {
             "Employee_Name": req.body.Employee_Name,
             "EmpID": parseInt(req.body.EmpID),
-            "MarriedID":(req.body.MaritalDesc=='Married')?1:0,
-            "MaritalStatusID":(req.body.MaritalDesc=='Single')?1:0 ,
-            "GenderID": (req.body.Sex=="F")?1:0,
+            "MarriedID": (req.body.MaritalDesc == 'Married') ? 1 : 0,
+            "MaritalStatusID": (req.body.MaritalDesc == 'Single') ? 1 : 0,
+            "GenderID": (req.body.Sex == "F") ? 1 : 0,
             "EmpStatusID": req.body.EmpStatusID,
             "DeptID": req.body.DeptID,
             "PerfScoreID": req.body.PerfScoreID,
             "FromDiversityJobFairID": req.body.FromDiversityJobFairID,
-            "Salary": req.body.Salary??"NA",
+            "Salary": req.body.Salary ?? "NA",
             "Termd": req.body.Termd,
             "PositionID": req.body.PositionID,
             "Position": req.body.Position,
-            "State": req.body.State??"NA",
-            "Zip": req.body.Zip??"NA",
+            "State": req.body.State ?? "NA",
+            "Zip": req.body.Zip ?? "NA",
             "DOB": req.body.DOB,
             "Sex": req.body.Sex,
             "MaritalDesc": req.body.MaritalDesc,
