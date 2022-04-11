@@ -50,6 +50,33 @@ MongoClient.connect(url, function (err, db) {
 
 });
 
+
+app.post('/validateEmail/:id', (req, res) => {
+
+    if (req.body.email.toLowerCase().match(/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/) == null) {
+        res.json(
+            {
+                msg: "Not in a valid email format"
+            }
+        )
+    }
+    else {
+        dbcon.collection('users').findOne({ email: req.body.email }, (err, res1) => {
+            if (err) { throw err }
+            if (res1 == null) {
+                res.json({
+                    msg: (req.params.id == "login") ? "Invalid Email" : ""
+                })
+            }
+            else {
+                res.json({
+                    msg: (req.params.id == "login") ? "" : "Username already Exists"
+                })
+            }
+        })
+    }
+})
+
 app.post("/validateIDs", (req, res) => {
     var empPromise = new Promise((resolve, reject) => {
         dbcon.collection('EmployeeDetails').findOne({ EmpID: parseInt(req.body.empID) }, (err, res1) => {
@@ -62,10 +89,10 @@ app.post("/validateIDs", (req, res) => {
         })
     })
     empPromise.then((val) => {
-        if(val!=null){
+        if (val != null) {
             res.json(
                 {
-                    errMsg:"",
+                    errMsg: "",
                 }
             )
         }
@@ -77,7 +104,7 @@ app.post("/validateIDs", (req, res) => {
                 }
             )
         }
-        
+
 
     })
 })
@@ -112,7 +139,6 @@ app.post("/1vs1Analytics", (req, res) => {
 
 
 app.get('/home', (req, res) => {
-    console.log(req.session)
     if (req.session.auth) {
         res.render('home', { name: req.session.name });
     }
@@ -171,7 +197,7 @@ app.get("/CompareAnalytics/:id", (req, res) => {
     Promise.all(promises).then((res1) => {
         avgResults = res1;
         typeof (avgResults)
-        res.render('compareCharts', { labels: labels, dataSet: dataSet, name: req.session.name, avgResults: avgResults, mode: "avgCompare", emp1_Id:"",emp2_Id:""})
+        res.render('compareCharts', { labels: labels, dataSet: dataSet, name: req.session.name, avgResults: avgResults, mode: "avgCompare", emp1_Id: "", emp2_Id: "" })
     })
 })
 
@@ -207,8 +233,6 @@ app.get("/analytics", (req, res) => {
             labels.push(res1['_id'])
             dataSet.push(res1['Count'])
         })
-        console.log(labels)
-        console.log(dataSet)
         res.render('charts', { labels: labels, dataSet: dataSet, name: req.session.name })
     })
 })
@@ -503,7 +527,7 @@ app.get('/data', (req, res) => {
 
 app.get('/', (req, res) => {
     req.session.auth = false;
-    res.render('login', { errDesc: "" });
+    res.render('login');
 })
 
 
@@ -528,19 +552,25 @@ app.get('/form', (req, res) => {
 app.post('/', (req, res) => {
     dbcon.collection("users").findOne({ email: req.body.email }, (err, res1) => {
         if (err) throw err;
-        if (!res1) {
-            res.render('login', { errDesc: "Inavlid User!" })
+        if (res1 == null) {
+            res.json({
+                msg: "Invalid Username"
+            })
         }
         else {
             var passMatch = bcrypt.compare(req.body.password, res1.password);
             passMatch.then((val) => {
                 if (!val) {
-                    res.render('login', { errDesc: "Inavlid Password!" })
+                    res.json({
+                        msg: "Invalid Password"
+                    })
                 }
                 else {
                     req.session.auth = true;
                     req.session.name = res1.name;
-                    res.redirect("/home")
+                    res.json({
+                        msg: "success"
+                    })
                 }
             })
 
@@ -574,7 +604,7 @@ app.post('/save', (req, res) => {
             "CitizenDesc": req.body.CitizenDesc,
             "HispanicLatino": req.body.HispanicLatino,
             "RaceDesc": req.body.RaceDesc,
-            "DateofHire": req.body.DateofHire.replace(/-/g,"/"),
+            "DateofHire": req.body.DateofHire.replace(/-/g, "/"),
             "DateofTermination": req.body.DateofTermination,
             "TermReason": req.body.TermReason,
             "EmploymentStatus": req.body.EmploymentStatus,
@@ -618,21 +648,34 @@ app.post('/save', (req, res) => {
 
 app.post("/registerSave", (req, res) => {
 
-    if (req.body.ename.match(/[0-9]/)) {
-        res.render('register', { errDesc: "Only alphabets are allowed in Full Name field" })
+
+    if (req.body.ename == "" || req.body.email == "" || req.body.password == "" || req.body.cPassword == "") {
+        res.json(
+            {
+                msg: "Fields should not be empty"
+            }
+        )
     }
+    if (req.body.ename.match(/[0-9]/)) {
+        res.json(
+            {
+                msg: "Only alphabets are allowed in Full Name field"
+            }
+        )
+    }
+
     else {
         dbcon.collection('users').findOne({ email: req.body.email }, (err, res1) => {
             if (err) {
-                console.log("No")
+                throw err
             }
             else {
                 if (res1) {
-                    res.render('register', { errDesc: "Username Already Exists" })
+                    res.json({ msg: "Username Already Exists" })
                 }
                 else {
                     if (req.body.password != req.body.cPassword) {
-                        res.render('register', { errDesc: "Password mismatch" })
+                        res.json({ msg: "Password mismatch" })
                     }
                     else {
                         var newUser = {
@@ -646,7 +689,9 @@ app.post("/registerSave", (req, res) => {
                             dbcon.collection('users').insertOne(newUser, (err, res1) => {
                                 req.session.auth = true;
                                 req.session.name = req.body.ename;
-                                res.redirect('/data')
+                                res.json({
+                                    msg: "success"
+                                })
                             })
                         })
 
