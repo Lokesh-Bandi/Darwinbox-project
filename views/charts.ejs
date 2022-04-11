@@ -72,29 +72,33 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="collapse multi-collapse" id="multiCollapseExample1">
-                                <div class="card card-body" style="height: 30rem;">
-                                    <canvas id="myChart1"></canvas>
+                                <h3 class="text-dark font-weight-bold"> Polar Area Chart</h3>
+                                <div class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                                    <canvas id="myChart1" style="background-color:gainsboro"></canvas>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="collapse multi-collapse" id="multiCollapseExample2">
-                                <div class="card card-body" style="height: 30rem;">
-                                    <canvas id="myChart2"></canvas>
+                                <h3 class="text-dark font-weight-bold"> Bar Graph</h3>
+                                <div class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                                    <canvas id="myChart2" style="background-color:gainsboro"></canvas>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="collapse multi-collapse" id="multiCollapseExample3">
-                                <div class="card card-body" style="height: 30rem;">
-                                    <canvas id="myChart3"></canvas>
+                                <h3 class="text-dark font-weight-bold">Doughnut Chart</h3>
+                                <div class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                                    <canvas id="myChart3" style="background-color:gainsboro"></canvas>
                                 </div>
                             </div>
                         </div>
                         <div class="col-12">
                             <div class="collapse multi-collapse" id="multiCollapseExample4">
-                                <div class="card card-body" style="height: 30rem;">
-                                    <canvas id="myChart4"></canvas>
+                                <h3 class="text-dark font-weight-bold"> Line Chart</h3>
+                                <div class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                                    <canvas id="myChart4" style="background-color:gainsboro"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -131,10 +135,26 @@
                 }]
             }
             var optionsObj = {
+                scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                fontSize: 20,
+                                fontColor:"black"
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                fontSize:16,
+                                fontColor:'black'
+                            }
+                        }]
+                        
+                    },
                 maintainAspectRatio: false,
                 title: {
                     display: true,
-                    text: 'Predicted world population (millions) in 2050'
+                    text: 'Graphs'
                 }
             }
             new Chart(ctx1, {
@@ -154,7 +174,16 @@
             });
             new Chart(ctx4, {
                 type: 'line',
-                data: dataObj,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        fill:false,
+                        label: "Employees",
+                        backgroundColor: "black",
+                        borderColor: "red",
+                        data: data
+                    }]
+                },
                 options: optionsObj
             });
         </script>

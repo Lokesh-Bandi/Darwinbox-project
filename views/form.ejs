@@ -144,13 +144,9 @@
                           <select class="form-control" id="Position" name="Position"
                             onchange="validateField('Position','posErr')">
                             <option value="None" selected>None</option>
-                            <option value="Accountant I">Accountant I</option>
-                            <option value="Administrative Assistant">Administrative Assistant</option>
-                            <option value="IT Director">IT Director</option>
-                            <option value="Production Technician I">Production Technician I</option>
-                            <option value="Production Technician II">Production Technician II</option>
-                            <option value="Sales Manager">Sales Manager</option>
-                            <option value="Senior BI Developer">Senior BI Developer</option>
+                            <% for(var x of positions){ %>
+                              <option value="<%= x._id %>"><%= x._id %></option>
+                          <% } %>
                           </select>
                           <small class="text-danger" id="posErr"></small>
                         </div>
@@ -186,12 +182,9 @@
                           <select class="form-control" id="Department" name="Department"
                             onchange="validateField('Department','deptErr')">
                             <option value="None">None</option>
-                            <option value="Admin Offices">Admin Offices</option>
-                            <option value="Executive Office">Executive Office</option>
-                            <option value="IT/IS">IT/IS</option>
-                            <option value="Production"">Production" </option>
-                            <option value="Sales">Sales</option>
-                            <option value="Software Engineering">Software Engineering</option>
+                            <% for(var x of depts){ %>
+                              <option value="<%= x._id %>"><%= x._id %></option>
+                            <% } %>
                           </select>
                           <small class="text-danger" id="deptErr"></small>
                         </div>

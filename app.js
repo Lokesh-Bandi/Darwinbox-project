@@ -7,6 +7,7 @@ const { v4: uuidv4 } = require('uuid');
 var MongoClient = require('mongodb').MongoClient;
 const MongoStore = require('connect-mongo');
 var bcrypt = require('bcryptjs');
+const { resolve } = require('path');
 var ObjectId = require("mongodb").ObjectId;
 
 var url = "mongodb://localhost:27017/FullAssignment";
@@ -50,6 +51,39 @@ MongoClient.connect(url, function (err, db) {
 
 });
 
+app.get('/deptAnalysis',(req,res)=>{
+    var pipeline=[
+        {
+          '$match': {
+            'Department': req.query.dept
+          }
+        }, {
+          '$group': {
+            '_id': '$'+req.query.analyticsType, 
+            'Count': {
+              '$sum': 1
+            }
+          }
+        }
+      ]
+    dbcon.collection('EmployeeDetails').aggregate(pipeline).toArray((err,res1)=>{
+        if(err){
+            throw err
+        }
+        else{
+            res.json({
+               data:res1,
+            })
+        }
+    })
+})
+
+app.get('/deptartment_Analytics_Page',(req,res)=>{
+    dbcon.collection('DepartmentsDB').find({}).toArray((err,res1)=>{
+        res.render('deptAnalytics',{name:req.session.name,depts:res1})
+    })
+   
+})
 
 app.post('/validateEmail/:id', (req, res) => {
 
@@ -535,10 +569,42 @@ app.get('/', (req, res) => {
 
 app.get('/form', (req, res) => {
     if (req.session.auth == true) {
-        dbcon.collection('EmployeeDetails').find({}).sort({ EmpID: -1 }).limit(1).toArray((err, res1) => {
-            if (err) throw err;
-            res.render('form', { name: req.session.name, "EmpID": res1[0].EmpID + 1, mode: "newForm" })
+
+        var deptPromise=new Promise((resolve,reject)=>{
+            dbcon.collection('DepartmentsDB').find({}).toArray((err,res1)=>{
+                if(err){
+                    reject(err)
+                }
+                else{
+                    resolve(res1)
+                }
+            })
         })
+        var positionPromise=new Promise((resolve,reject)=>{
+            dbcon.collection('Positions DB').find({}).toArray((err,res1)=>{
+                if(err){
+                    reject(err)
+                }
+                else{
+                    resolve(res1)
+                }
+            })
+        })
+        var empIDPromise=new Promise((resolve,reject)=>{
+            dbcon.collection('EmployeeDetails').find({}).sort({ EmpID: -1 }).limit(1).toArray((err, res1) => {
+                if(err){
+                    reject(err)
+                }
+                else{
+                    resolve(res1[0].EmpID+1)
+                }
+                
+            })
+        })
+        Promise.all([deptPromise,positionPromise,empIDPromise]).then((val)=>{
+            res.render('form', { name: req.session.name, "EmpID":val[2], mode: "newForm" ,depts:val[0],positions:val[1]})
+        })
+        
 
     }
     else {
