@@ -171,7 +171,7 @@ app.get("/CompareAnalytics/:id", (req, res) => {
     Promise.all(promises).then((res1) => {
         avgResults = res1;
         typeof (avgResults)
-        res.render('compareCharts', { labels: labels, dataSet: dataSet, name: req.session.name, avgResults: avgResults, mode: "avgCompare" })
+        res.render('compareCharts', { labels: labels, dataSet: dataSet, name: req.session.name, avgResults: avgResults, mode: "avgCompare", emp1_Id:"",emp2_Id:""})
     })
 })
 
@@ -574,7 +574,7 @@ app.post('/save', (req, res) => {
             "CitizenDesc": req.body.CitizenDesc,
             "HispanicLatino": req.body.HispanicLatino,
             "RaceDesc": req.body.RaceDesc,
-            "DateofHire": req.body.DateofHire,
+            "DateofHire": req.body.DateofHire.replace(/-/g,"/"),
             "DateofTermination": req.body.DateofTermination,
             "TermReason": req.body.TermReason,
             "EmploymentStatus": req.body.EmploymentStatus,
