@@ -53,7 +53,7 @@
                 </div>
                 <div class="container">
                     <div class="row">
-                        <div class="col-5 align-self-end">
+                        <div class="col-4 align-self-end">
                             <form>
                                 <label for="department">Select one from below</label>
                                 <select id="department" name="department" class="form-control">
@@ -65,8 +65,8 @@
                                 </select>
                             </form>
                         </div>
-                        <div class="col-5 align-self-end">
-                            <label for="analyticsType">Select one from below</label>
+                        <div class="col-4 align-self-end">
+                            <label for="analyticsType">Select Analytics Type</label>
                             <select id="analyticsType" name="analyticsType" class="form-control">
                                 <option value="ManagerName">Managers Wise Count</option>
                                 <option value="Sex">Gender Count Info</option>
@@ -79,6 +79,28 @@
                                 <option value="EmploymentStatus">Employment Status Info</option>
                             </select>
                         </div>
+                        <div class="col-4 align-self-end">
+                            <label for="EmploymentStatus">Employee Status</label>
+                            <select id="EmploymentStatus" name="EmploymentStatus" class="form-control">
+                                <option value="">All</option>
+                                <option value="Active">Active</option>
+                                <option value="Voluntarily Terminated">Voluntarily Terminated</option>
+                                <option value="Terminated for Cause">Terminated for Cause</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-4 align-self-end">
+                            <label for="MaritalStatus">Select Matial Status</label>
+                            <select id="MaritalStatus" name="MaritalStatus" class="form-control">
+                                <option value="">All</option>
+                                <option value="Single">Single</option>
+                                <option value="Married">Married</option>
+                                <option value="Divorced">Divorced</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center mt-2">
                         <div class="col-2 align-self-end">
                             <button type="button" id="submitBtn" class="btn btn-primary">Do Analysis</button>
                         </div>
@@ -87,32 +109,40 @@
                 <div id="graphContainer" class="container mt-5" style="display: none;">
                     <div class="row justify-content-center">
                         <div class="col-12">
-                            <h3 class="text-dark font-weight-bold"> Bar Graph</h3>
-                            <div class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                            <h3 class="text-dark font-weight-bold" style="display: inline-block;"> Bar Graph</h3>
+                            <h3 style="display: inline-block;"><button id="tog1"
+                                    class="btn btn-warning btn-sm ml-3">FadeIn/FadeOut</button></h3>
+                            <div id="chartBlock1" class="card card-body" style="height: 30rem;background-color:#c5d4ed">
                                 <canvas id="myChart1" style="background-color:gainsboro"></canvas>
                             </div>
                         </div>
                     </div>
                     <div class="row justify-content-center mt-5">
                         <div class="col-12">
-                            <h3 class="text-dark font-weight-bold"> Pie Chart</h3>
-                            <div class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                            <h3 class="text-dark font-weight-bold" style="display: inline-block;"> Pie Chart</h3>
+                            <h3 style="display: inline-block;"><button id="tog2"
+                                    class="btn btn-warning btn-sm ml-3">FadeIn/FadeOut</button></h3>
+                            <div id="chartBlock2" class="card card-body" style="height: 30rem;background-color:#c5d4ed">
                                 <canvas id="myChart2" style="background-color:gainsboro"></canvas>
                             </div>
                         </div>
                     </div>
                     <div class="row justify-content-center mt-5">
                         <div class="col-12">
-                            <h3 class="text-dark font-weight-bold"> Polar Area Chart</h3>
-                            <div class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                            <h3 class="text-dark font-weight-bold" style="display: inline-block;"> Polar Area Chart</h3>
+                            <h3 style="display: inline-block;"><button id="tog3"
+                                    class="btn btn-warning btn-sm ml-3">FadeIn/FadeOut</button></h3>
+                            <div id="chartBlock3" class="card card-body" style="height: 30rem;background-color:#c5d4ed">
                                 <canvas id="myChart3" style="background-color:gainsboro"></canvas>
                             </div>
                         </div>
                     </div>
                     <div class="row justify-content-center mt-5">
                         <div class="col-12">
-                            <h3 class="text-dark font-weight-bold"> Line Chart</h3>
-                            <div class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                            <h3 class="text-dark font-weight-bold" style="display: inline-block;"> Line Chart</h3>
+                            <h3 style="display: inline-block;"><button id="tog4"
+                                    class="btn btn-warning btn-sm ml-3">FadeIn/FadeOut</button></h3>
+                            <div id="chartBlock4" class="card card-body" style="height: 30rem;background-color:#c5d4ed">
                                 <canvas id="myChart4" style="background-color:gainsboro"></canvas>
                             </div>
                         </div>
@@ -129,6 +159,19 @@
 
         <script>
 
+            $('#tog1').click(function () {
+                $('#chartBlock1').fadeToggle()
+            })
+            $('#tog2').click(function () {
+                $('#chartBlock2').fadeToggle()
+            })
+            $('#tog3').click(function () {
+                $('#chartBlock3').fadeToggle()
+            })
+            $('#tog4').click(function () {
+                $('#chartBlock4').fadeToggle()
+            })
+
             const ctx1 = document.getElementById('myChart1');
             const ctx2 = document.getElementById('myChart2');
             const ctx3 = document.getElementById('myChart3');
@@ -139,16 +182,16 @@
             var chart4;
 
             $('#submitBtn').click(function () {
-                if(chart1!=null){
+                if (chart1 != null) {
                     chart1.destroy()
                 }
-                if(chart2!=null){
+                if (chart2 != null) {
                     chart2.destroy()
                 }
-                if(chart3!=null){
+                if (chart3 != null) {
                     chart3.destroy()
                 }
-                if(chart4!=null){
+                if (chart4 != null) {
                     chart4.destroy()
                 }
                 $.ajax({
@@ -157,7 +200,9 @@
                     dataType: "json",
                     data: {
                         dept: $('#department').val(),
-                        analyticsType: $("#analyticsType").val()
+                        analyticsType: $("#analyticsType").val(),
+                        empStatus: $("#EmploymentStatus").val(),
+                        martialStatus:$('#MaritalStatus').val()
                     },
                     success: function (res) {
                         drawGraph(res.data)
@@ -191,16 +236,16 @@
                             ticks: {
                                 beginAtZero: true,
                                 fontSize: 20,
-                                fontColor:"black"
+                                fontColor: "black"
                             }
                         }],
                         xAxes: [{
                             ticks: {
-                                fontSize:16,
-                                fontColor:'black'
+                                fontSize: 16,
+                                fontColor: 'black'
                             }
                         }]
-                        
+
                     },
                     maintainAspectRatio: false,
                     title: {
@@ -230,19 +275,19 @@
                 chart4 = new Chart(ctx4, {
                     type: 'line',
                     data: {
-                    labels: labels,
-                    datasets: [{
-                        fill:false,
-                        label: "Employees",
-                        backgroundColor: "black",
-                        borderColor: "red",
-                        data: dataValues
-                    }]
-                },
+                        labels: labels,
+                        datasets: [{
+                            fill: false,
+                            label: "Employees",
+                            backgroundColor: "black",
+                            borderColor: "red",
+                            data: dataValues
+                        }]
+                    },
                     options: optionsObj
                 });
-                
-                
+
+
                 $('#graphContainer').show()
             }
         </script>

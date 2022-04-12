@@ -55,13 +55,18 @@
                     <p>
                         <button class="btn btn-primary" type="button" data-toggle="collapse"
                             data-target="#multiCollapseExample1" aria-expanded="false"
-                            aria-controls="multiCollapseExample1">Bar Graph</button>
+                            aria-controls="multiCollapseExample1">Show Graphs</button>
                     </p>
                     <div class="row">
                         <div class="col-12">
                             <div class="collapse multi-collapse" id="multiCollapseExample1">
-                                <div class="card card-body" style="height: 30rem;">
-                                    <canvas id="myCompareChart"></canvas>
+                                <h3 class="text-dark font-weight-bold">Bar Graph</h3>
+                                <div class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                                    <canvas id="myCompareChart1" style="background-color:gainsboro"></canvas>
+                                </div>
+                                <h3 class="text-dark font-weight-bold">Line Graph</h3>
+                                <div class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                                    <canvas id="myCompareChart2" style="background-color:gainsboro"></canvas>
                                 </div>
                             </div>
                         </div>
@@ -76,7 +81,8 @@
     <%- include("partials/footer") -%>
 
         <script>
-            const ctx1 = document.getElementById('myCompareChart');
+            const ctx1 = document.getElementById('myCompareChart1');
+            const ctx2 = document.getElementById('myCompareChart2');
             var data = []
             var labels = []
             var avgResults = []
@@ -90,29 +96,55 @@
                 avgResults.push(x);
             }
             var dataObj = {
+                
                 labels: labels,
                 datasets: [
                     {
+                        fill:false,
                         label: ('<%= mode %>' == '1vs1Compare') ? '<%= emp1_Id %>' : "Current Employee",
-                        backgroundColor: "#3e95cd",
+                        backgroundColor: "#a85654",
+                        borderColor:"red",
                         data: data
                     }, {
+                        fill:false,
                         label: ('<%= mode %>' == '1vs1Compare') ? '<%= emp2_Id %>' : "Average of Employee",
-                        backgroundColor: "#8e5ea2",
+                        backgroundColor: "#818a3b",
+                        borderColor:"green",
                         data: avgResults
                     }
 
                 ]
             }
             var optionsObj = {
+                scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                fontSize: 20,
+                                fontColor:"black"
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                fontSize:16,
+                                fontColor:'black'
+                            }
+                        }]
+                        
+                    },
                 maintainAspectRatio: false,
                 title: {
                     display: true,
-                    text: 'Predicted world population (millions) in 2050'
+                    text: 'Statistics of a employee'
                 }
             }
             new Chart(ctx1, {
                 type: 'bar',
+                data: dataObj,
+                options: optionsObj
+            });
+            new Chart(ctx2, {
+                type: 'line',
                 data: dataObj,
                 options: optionsObj
             });

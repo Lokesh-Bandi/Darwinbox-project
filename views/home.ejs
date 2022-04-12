@@ -36,6 +36,17 @@
           </div>
         </div>
       </div>
+
+
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        <li class="nav-item">
+            <p>
+              <button class="btn btn-danger btn-block" onclick="window.location.href='/logout'">Logout</button>
+            </p>
+        </li>
+      </ul>
+    </nav>
     </div>
     <!-- /.sidebar -->
   </aside>
@@ -56,19 +67,19 @@
             </div>
             <div class="modal-body">
               <form action="/analytics" method="get">
-                  <label for="analyticsType">Select one from below</label>
-                  <select id="analyticsType" name="analyticsType" class="form-control">
-                    <option value="ManagerName">Managers Wise Count</option>
-                    <option value="Sex">Gender Count Info</option>
-                    <option value="RaceDesc">Race Description</option>
-                    <option value="RecruitmentSource">Recruitment Source</option>
-                    <option value="PerformanceScore">Performance Count</option>
-                    <option value="CitizenDesc">Citizen Description</option>
-                    <option value="MaritalDesc">Marital Description</option>
-                    <option value="Position">Designation Wise</option>
-                    <option value="Department">Department Wise Count</option>
-                    <option value="EmploymentStatus">Employment Status Info</option>
-                  </select>
+                <label for="analyticsType">Select one from below</label>
+                <select id="analyticsType" name="analyticsType" class="form-control">
+                  <option value="ManagerName">Managers Wise Count</option>
+                  <option value="Sex">Gender Count Info</option>
+                  <option value="RaceDesc">Race Description</option>
+                  <option value="RecruitmentSource">Recruitment Source</option>
+                  <option value="PerformanceScore">Performance Count</option>
+                  <option value="CitizenDesc">Citizen Description</option>
+                  <option value="MaritalDesc">Marital Description</option>
+                  <option value="Position">Designation Wise</option>
+                  <option value="Department">Department Wise Count</option>
+                  <option value="EmploymentStatus">Employment Status Info</option>
+                </select>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -113,7 +124,6 @@
           </div>
         </div>
       </div>
-
       <div class="jumbotron d-flex align-items-center min-vh-100">
         <div class="container">
           <div class="row mb-10"></div>
@@ -153,6 +163,7 @@
             </div>
             <!-- /.col -->
           </div>
+          
           <!-- /.row -->
         </div>
       </div>

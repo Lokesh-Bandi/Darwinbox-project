@@ -55,7 +55,7 @@ app.get('/deptAnalysis',(req,res)=>{
     var pipeline=[
         {
           '$match': {
-            'Department': req.query.dept
+            'Department': req.query.dept,
           }
         }, {
           '$group': {
@@ -66,6 +66,12 @@ app.get('/deptAnalysis',(req,res)=>{
           }
         }
       ]
+      if(req.query.empStatus){
+          pipeline[0]['$match'].EmploymentStatus=req.query.empStatus
+      }
+      if(req.query.martialStatus){
+        pipeline[0]['$match'].MaritalDesc=req.query.martialStatus
+    }
     dbcon.collection('EmployeeDetails').aggregate(pipeline).toArray((err,res1)=>{
         if(err){
             throw err
