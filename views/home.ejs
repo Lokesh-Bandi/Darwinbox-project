@@ -66,7 +66,7 @@
               </button>
             </div>
             <div class="modal-body">
-              <form action="/analytics" method="get">
+              <form action="/charts/analytics" method="get">
                 <label for="analyticsType">Select one from below</label>
                 <select id="analyticsType" name="analyticsType" class="form-control">
                   <option value="ManagerName">Managers Wise Count</option>
@@ -102,7 +102,7 @@
               </button>
             </div>
             <div class="modal-body">
-              <form action="/1vs1Analytics" method="post">
+              <form action="/charts/1vs1Analytics" method="get">
                 <div class="form-group">
                   <label for="emp1">Employee_1 ID</label><br>
                   <input type="text" id="emp1" name="emp1" placeholder="Enter Employee ID" class="form-control"
@@ -149,7 +149,7 @@
               <div class="card" style="width: 13rem;">
                 <img class="card-img-top" src="images/1vs1.png" alt="Card image cap">
                 <div class="card-body">
-                  <a href="/1vs1" data-target="#1vs1Modal" data-toggle="modal" class="btn btn-primary">1 vs 1</a>
+                  <a data-target="#1vs1Modal" data-toggle="modal" class="btn btn-primary">1 vs 1</a>
                 </div>
               </div>
             </div>

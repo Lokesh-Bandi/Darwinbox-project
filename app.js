@@ -7,8 +7,8 @@ const { v4: uuidv4 } = require('uuid');
 var MongoClient = require('mongodb').MongoClient;
 const MongoStore = require('connect-mongo');
 var bcrypt = require('bcryptjs');
-const { resolve } = require('path');
 var ObjectId = require("mongodb").ObjectId;
+var chartsJS=require('./routes/chartsJS')
 
 var url = "mongodb://localhost:27017/FullAssignment";
 let dbcon;
@@ -20,15 +20,17 @@ const ObjectIdGen = function () {
 
 var app = express();
 
+
 app.use(logger('tiny'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));  //to use the req.body variable when the html form is submitted
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/edit', express.static(path.join(__dirname, 'public')));
+app.use('/charts', express.static(path.join(__dirname, 'public')));
 app.use('/displayData/employees', express.static(path.join(__dirname, 'public')));
 app.use('/displayData/trashbin', express.static(path.join(__dirname, 'public')));
-app.use('/CompareAnalytics', express.static(path.join(__dirname, 'public')));
+app.use('/charts/CompareAnalytics', express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs')
 app.set('trust proxy', 1) // trust first proxy
 app.use(session({
@@ -45,50 +47,20 @@ app.use(session({
 }))
 
 
+app.use('/charts',chartsJS)
+
+
 MongoClient.connect(url, function (err, db) {
     if (err) throw err;
     dbcon = db.db("FullAssignment");
 
 });
 
-app.get('/deptAnalysis',(req,res)=>{
-    var pipeline=[
-        {
-          '$match': {
-            'Department': req.query.dept,
-          }
-        }, {
-          '$group': {
-            '_id': '$'+req.query.analyticsType, 
-            'Count': {
-              '$sum': 1
-            }
-          }
-        }
-      ]
-      if(req.query.empStatus){
-          pipeline[0]['$match'].EmploymentStatus=req.query.empStatus
-      }
-      if(req.query.martialStatus){
-        pipeline[0]['$match'].MaritalDesc=req.query.martialStatus
-    }
-    dbcon.collection('EmployeeDetails').aggregate(pipeline).toArray((err,res1)=>{
-        if(err){
-            throw err
-        }
-        else{
-            res.json({
-               data:res1,
-            })
-        }
-    })
-})
 
 app.get('/deptartment_Analytics_Page',(req,res)=>{
     dbcon.collection('DepartmentsDB').find({}).toArray((err,res1)=>{
         res.render('deptAnalytics',{name:req.session.name,depts:res1})
-    })
-   
+    }) 
 })
 
 app.post('/validateEmail/:id', (req, res) => {
@@ -148,34 +120,7 @@ app.post("/validateIDs", (req, res) => {
 
     })
 })
-app.post("/1vs1Analytics", (req, res) => {
 
-    var labels = ['EmpSatisfaction', 'SpecialProjectsCount', 'DaysLateLast30', 'Absences'];
-
-    var emp1Promise = new Promise((resolve, reject) => {
-        dbcon.collection('EmployeeDetails').findOne({ EmpID: parseInt(req.body.emp1) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1) => {
-            if (err) {
-                reject(err)
-            }
-            else {
-                resolve(res1)
-            }
-        })
-    })
-    var emp2Promise = new Promise((resolve, reject) => {
-        dbcon.collection('EmployeeDetails').findOne({ EmpID: parseInt(req.body.emp2) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1) => {
-            if (err) {
-                reject(err)
-            }
-            else {
-                resolve(res1)
-            }
-        })
-    })
-    Promise.all([emp1Promise, emp2Promise]).then((val) => {
-        res.render('compareCharts', { labels: labels, dataSet: Object.values(val[0]), name: req.session.name, avgResults: Object.values(val[1]), mode: "1vs1Compare", emp1_Id: req.body.emp1, emp2_Id: req.body.emp2 })
-    })
-})
 
 
 app.get('/home', (req, res) => {
@@ -185,96 +130,6 @@ app.get('/home', (req, res) => {
     else {
         res.render('unauthorized')
     }
-})
-
-
-
-app.get("/CompareAnalytics/:id", (req, res) => {
-
-    var avgResults = []
-    var dataSet = []
-    var promises = []
-
-    var labels = ['EmpSatisfaction', 'SpecialProjectsCount', 'DaysLateLast30', 'Absences'];
-    for (var x of labels) {
-        var avgPipeline = [
-            {
-                '$match': {}
-            }, {
-                '$group': {
-                    '_id': null,
-                    'Average': {
-                        '$avg': '$' + x,
-                    }
-                }
-            }
-        ];
-        promises.push(new Promise((resolve, reject) => {
-            dbcon.collection("EmployeeDetails").aggregate(avgPipeline).toArray((err, res1) => {
-                if (err) {
-                    reject(err)
-                }
-                else {
-                    resolve(res1[0]['Average'])
-                }
-            });
-        }));
-    }
-    var ownResultPromise = new Promise((resolve, reject) => {
-        dbcon.collection("EmployeeDetails").findOne({ _id: ObjectId(req.params.id) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1) => {
-            if (err) {
-                reject(err)
-            }
-            else {
-                resolve(res1)
-            }
-        })
-    })
-    ownResultPromise.then((val) => {
-        dataSet = Object.values(val);
-    })
-    promises.push(ownResultPromise)
-    Promise.all(promises).then((res1) => {
-        avgResults = res1;
-        typeof (avgResults)
-        res.render('compareCharts', { labels: labels, dataSet: dataSet, name: req.session.name, avgResults: avgResults, mode: "avgCompare", emp1_Id: "", emp2_Id: "" })
-    })
-})
-
-
-
-app.get("/analytics", (req, res) => {
-    var pipeline = [
-        {
-            '$match': {}
-        }, {
-            '$group': {
-                '_id': '$' + req.query.analyticsType,
-                'Count': {
-                    '$sum': 1
-                }
-            }
-        }
-    ];
-    var labels = []
-    var dataSet = []
-    var resultPromise = new Promise((resolve, reject) => {
-        dbcon.collection("EmployeeDetails").aggregate(pipeline).toArray((err, res1) => {
-            if (err) {
-                reject(err)
-            }
-            else {
-                resolve(res1)
-            }
-        });
-    })
-    resultPromise.then((result) => {
-        result.forEach((res1) => {
-            labels.push(res1['_id'])
-            dataSet.push(res1['Count'])
-        })
-        res.render('charts', { labels: labels, dataSet: dataSet, name: req.session.name })
-    })
 })
 
 
@@ -619,8 +474,6 @@ app.get('/form', (req, res) => {
 })
 
 
-
-
 app.post('/', (req, res) => {
     dbcon.collection("users").findOne({ email: req.body.email }, (err, res1) => {
         if (err) throw err;
@@ -794,3 +647,4 @@ app.get('/logout', (req, res) => {
 
 
 module.exports = app;
+exports.dbcon=dbcon
