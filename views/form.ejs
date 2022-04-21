@@ -66,7 +66,7 @@
                   <h3 class="card-title">Employee Form</h3>
                 </div>
                 <div class="card-body">
-                  <form action="/save" method="post">
+                  <form action="/operations/save" method="post">
                     <% if(mode=="editable" ){ %>
                       <% for(var [x,y] of Object.entries(editObject)) { %>
                         <% if(x=="_id" ) { continue; } %>
@@ -86,7 +86,7 @@
                             <% } %>
                   </form>
                   <% if(mode=="newForm" ){ %>
-                    <form action="/save" method="post"onsubmit="return validateForm()">
+                    <form action="/operations/save" method="post"onsubmit="return validateForm()">
                       <div class="form-row">
                         <div class="col-md-6 mb-3 offset-md-3">
                           <label for="EmpID">EmpID</label>

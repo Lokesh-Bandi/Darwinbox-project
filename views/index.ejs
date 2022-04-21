@@ -151,19 +151,19 @@
                           </td>
                           <% if(mode=="employees" ){ %>
                             <td>
-                              <button class="btn" onclick="window.location.href='/edit/<%= tableArray[i]._id %>'">
+                              <button class="btn" onclick="window.location.href='/operations/edit/<%= tableArray[i]._id %>'">
                                 <i class="fa fa-edit fa-lg"></i></button> /
                               <button class="btn" id="b<%= tableArray[i]._id %>" data-toggle="modal"
-                                data-target="#deleteModal" data-path="/delete/<%= mode %>/<%= tableArray[i]._id %>"><i
+                                data-target="#deleteModal" data-path="/operations/delete/<%= mode %>/<%= tableArray[i]._id %>"><i
                                   class="fa fa-trash fa-lg"></i></button>
                             </td>
                             <% } else { %>
                               <td>
                                 <button class="btn" id="restoreButton"
-                                  onclick="window.location.href='/restore/<%= tableArray[i]._id %>'"><i
+                                  onclick="window.location.href='/operations/restore/<%= tableArray[i]._id %>'"><i
                                     class="fa fa-rotate-left fa-lg"></i></button> /
                                 <button class="btn" id="b<%= tableArray[i]._id %>" data-toggle="modal"
-                                  data-target="#deleteModal" data-path="/delete/<%= mode %>/<%= tableArray[i]._id %>"><i
+                                  data-target="#deleteModal" data-path="/operations/delete/<%= mode %>/<%= tableArray[i]._id %>"><i
                                     class="fa fa-trash fa-lg"></i></button>
                               </td>
                               <% } %>

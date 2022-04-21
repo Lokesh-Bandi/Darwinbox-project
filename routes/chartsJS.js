@@ -1,17 +1,15 @@
 var express = require('express')
-var example=require('./ex.js')
-var session = require('express-session');
-const MongoStore = require('connect-mongo');
 var router = express.Router()
-var ObjectId = require("mongodb").ObjectId;
-var url = "mongodb://localhost:27017/FullAssignment";
-let dbcon;
-var MongoClient = require('mongodb').MongoClient;
 
-MongoClient.connect(url, function (err, db) {
-    if (err) throw err;
-    dbcon = db.db("FullAssignment");
-});
+var session = require('express-session');
+const database = require('./database');
+const { v4: uuidv4 } = require('uuid');
+
+
+router.use(express.static('public'));
+router.use("/CompareAnalytics",express.static('public'));
+
+
 router.use(session({
     genid: function (req) {
         return uuidv4() // use UUIDs for session IDs
@@ -20,12 +18,17 @@ router.use(session({
     resave: false,
     saveUninitialized: true,
     cookie: { maxAge: 3000000 },
-    store: MongoStore.create({
-        mongoUrl: url,
+    store: database.MongoStore.create({
+        mongoUrl: database.url,
     }),
 }))
 
-router.get('/deptAnalysis', (req, res) => {
+router.use(async (req, res, next) => {
+    await database.connectDB();
+    next()
+})
+
+router.get('/deptAnalysis', async (req, res) => {
     var pipeline = [
         {
             '$match': {
@@ -46,20 +49,21 @@ router.get('/deptAnalysis', (req, res) => {
     if (req.query.martialStatus) {
         pipeline[0]['$match'].MaritalDesc = req.query.martialStatus
     }
-    dbcon.collection('EmployeeDetails').aggregate(pipeline).toArray((err, res1) => {
-        if (err) {
-            throw err
-        }
-        else {
-            res.json({
-                data: res1,
-            })
-        }
+
+    try {
+        var requiredData = await database.getDB().collection('EmployeeDetails').aggregate(pipeline).toArray()
+    }
+    catch (err) {
+        console.log(err)
+    }
+
+    res.json({
+        data: requiredData,
     })
 })
 
 
-router.get("/analytics", (req, res) => {
+router.get("/analytics", async (req, res) => {
     var pipeline = [
         {
             '$match': {}
@@ -74,23 +78,19 @@ router.get("/analytics", (req, res) => {
     ];
     var labels = []
     var dataSet = []
-    var resultPromise = new Promise((resolve, reject) => {
-        dbcon.collection("EmployeeDetails").aggregate(pipeline).toArray((err, res1) => {
-            if (err) {
-                reject(err)
-            }
-            else {
-                resolve(res1)
-            }
-        });
+    let requiredData;
+    try {
+        requiredData = await database.getDB().collection('EmployeeDetails').aggregate(pipeline).toArray()
+    }
+    catch (err) {
+        console.log(err)
+    }
+
+    requiredData.forEach((res1) => {
+        labels.push(res1['_id'])
+        dataSet.push(res1['Count'])
     })
-    resultPromise.then((result) => {
-        result.forEach((res1) => {
-            labels.push(res1['_id'])
-            dataSet.push(res1['Count'])
-        })
-        res.render('charts', { labels: labels, dataSet: dataSet, name: req.session.name })
-    })
+    res.render('charts', { labels: labels, dataSet: dataSet, name: req.session.name })
 })
 
 
@@ -114,7 +114,7 @@ router.get("/CompareAnalytics/:id", (req, res) => {
             }
         ];
         promises.push(new Promise((resolve, reject) => {
-            dbcon.collection("EmployeeDetails").aggregate(avgPipeline).toArray((err, res1) => {
+            database.getDB().collection("EmployeeDetails").aggregate(avgPipeline).toArray((err, res1) => {
                 if (err) {
                     reject(err)
                 }
@@ -125,7 +125,7 @@ router.get("/CompareAnalytics/:id", (req, res) => {
         }));
     }
     var ownResultPromise = new Promise((resolve, reject) => {
-        dbcon.collection("EmployeeDetails").findOne({ _id: ObjectId(req.params.id) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1) => {
+        database.getDB().collection("EmployeeDetails").findOne({ _id: database.ObjectId(req.params.id) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1) => {
             if (err) {
                 reject(err)
             }
@@ -146,31 +146,20 @@ router.get("/CompareAnalytics/:id", (req, res) => {
 
 
 
-router.get("/1vs1Analytics", (req, res) => {
+router.get("/1vs1Analytics", async(req, res) => {
     var labels = ['EmpSatisfaction', 'SpecialProjectsCount', 'DaysLateLast30', 'Absences'];
-    var emp1Promise = new Promise((resolve, reject) => {
-        dbcon.collection('EmployeeDetails').findOne({ EmpID: parseInt(req.query.emp1) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1) => {
-            if (err) {
-                reject(err)
-            }
-            else {
-                resolve(res1)
-            }
-        })
-    })
-    var emp2Promise = new Promise((resolve, reject) => {
-        dbcon.collection('EmployeeDetails').findOne({ EmpID: parseInt(req.query.emp2) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } }, (err, res1) => {
-            if (err) {
-                reject(err)
-            }
-            else {
-                resolve(res1)
-            }
-        })
-    })
-    Promise.all([emp1Promise, emp2Promise]).then((val) => {
-        res.render('compareCharts', { labels: labels, dataSet: Object.values(val[0]), name:"Name", avgResults: Object.values(val[1]), mode: "1vs1Compare", emp1_Id: req.query.emp1, emp2_Id: req.query.emp2 })
-    })
+    var empData1;
+    var empData2;
+    
+    try {
+        empData1 = await database.getDB().collection('EmployeeDetails').findOne({ EmpID: parseInt(req.query.emp1) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } })
+        empData2 = await database.getDB().collection('EmployeeDetails').findOne({ EmpID: parseInt(req.query.emp2) }, { projection: { _id: 0, EmpSatisfaction: 1, SpecialProjectsCount: 1, DaysLateLast30: 1, Absences: 1 } })
+    }
+    catch (err) {
+        console.log(err)
+    }
+
+    res.render('compareCharts', { labels: labels, dataSet: Object.values(empData1), name: req.session.name, avgResults: Object.values(empData2), mode: "1vs1Compare", emp1_Id: req.query.emp1, emp2_Id: req.query.emp2 })
 })
 
 

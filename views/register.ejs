@@ -83,7 +83,7 @@
                       <small class="text-danger font-weight-bold" id="registerErr"></small><br>
                       <button type="button" id="submitBtn" class="btn btn-primary btn-block btn-lg ">Register</button>
                     </div>
-                    <p class="text-center text-muted mt-5 mb-0">Have already an account? <a href="/"
+                    <p class="text-center text-muted mt-5 mb-0">Have already an account? <a href="/login"
                         class="fw-bold text-body"><u>Login here</u></a></p>
 
                   </form>
@@ -105,7 +105,7 @@
 
       $('#submitBtn').click(function () {
         $.ajax({
-          url: "/registerSave",
+          url: "/register/registerSave",
           method: "post",
           dataType: "json",
           data: {
