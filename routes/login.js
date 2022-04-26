@@ -33,12 +33,6 @@ router.use(async (req, res, next) => {
 })
 
 
-router.get('/', (req, res) => {
-    req.session.auth = false;
-    res.render('login');
-})
-
-
 router.post('/', async(req, res) => {
 
     var userData;

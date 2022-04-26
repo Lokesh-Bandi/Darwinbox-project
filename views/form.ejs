@@ -155,15 +155,9 @@
                           <select class="form-control" id="ManagerName" name="ManagerName"
                             onchange="validateField('ManagerName','mgrErr')">
                             <option value="None">None</option>
-                            <option value="Amy Dunn">Amy Dunn</option>
-                            <option value="Board of Directors">Board of Directors</option>
-                            <option value="Brandon R. LeBlanc">Brandon R. LeBlanc</option>
-                            <option value="Brannon Miller">Brannon Miller</option>
-                            <option value="Kelley Spirea">Kelley Spirea</option>
-                            <option value="Jennifer Zamora">Jennifer Zamora</option>
-                            <option value="Eric Dougall">Eric Dougall</option>
-                            <option value="Elijiah Gray">Elijiah Gray</option>
-                            <option value="Alex Sweetwater">Alex Sweetwater</option>
+                            <% for(var x of managers){ %>
+                              <option value="<%= x.Manager_Name %>" ><%= x.Manager_Name %></option>
+                          <% } %>
                           </select>
                           <small class="text-danger" id="mgrErr"></small>
                         </div>

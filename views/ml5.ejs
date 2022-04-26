@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include("partials/header") -%>
+
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="#" class="brand-link">
+            <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+                style="opacity: .8">
+            <span class="brand-text font-weight-light">Analytics</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar user panel (optional) -->
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="image">
+                    <img src="images/user.png" class="img-circle elevation-2" alt="User Image">
+                </div>
+                <div class="info">
+                    <a href="#" class="d-block">
+                        <%= name %>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SidebarSearch Form -->
+            <div class="form-inline">
+                <div class="input-group" data-widget="sidebar-search">
+                    <input class="form-control form-control-sidebar" type="search" placeholder="Search"
+                        aria-label="Search">
+                    <div class="input-group-append">
+                        <button class="btn btn-sidebar">
+                            <i class="fas fa-search fa-fw"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+    </aside>
+
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="container-fluid">
+                <div class="jumbotron jumbotron-fluid bg-secondary">
+                    <div class="container">
+                        <h1 class="display-4 font-weight-bold">Analytics</h1>
+                        <p class="lead font-weight-bold">Based on the Human Resource Data of an Organization</p>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-4 align-self-end">
+                            <form>
+                                <label for="gender">Select Gender</label>
+                                <select id="gender" name="gender" class="form-control">
+                                    <option value="M">Male</option>
+                                    <option value="F">Female</option>
+                                </select>
+                            </form>
+                        </div>
+                        <div class="col-4 align-self-end">
+                            <form>
+                                <label for="martialStatus">Select Martial Status</label>
+                                <select id="martialStatus" name="martialStatus" class="form-control">
+                                    <option value="Single">Single</option>
+                                    <option value="Married">Married</option>
+                                    <option value="Widowed">Widowed</option>
+                                    <option value="Divorced">Divorced</option>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center mt-2">
+                        <div class="col-3 align-self-end">
+                            <small id="errMsg" class="text-danger font-weight-bold"></small>
+                            <button type="button" id="submitBtn" class="btn btn-primary btn-block">Do Analysis</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Loading Animation -->
+                <div id="loadingPanel" class="d-flex justify-content-center mt-5">
+                    <div id="loading" class="spinner-border text-success" role="status" style="display: none;">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+
+
+                <div id="graphContainer" class="container mt-5" style="display: none;">
+                    <div class="row justify-content-center">
+                        <div class="col-12">
+                            <h3 class="text-dark font-weight-bold" style="display: inline-block;"> Bar Graph</h3>
+                            <h3 style="display: inline-block;"><button id="tog1"
+                                    class="btn btn-warning btn-sm ml-3">FadeIn/FadeOut</button></h3>
+                            <div id="chartBlock1" class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                                <canvas id="myChart1" style="background-color:gainsboro"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center mt-5">
+                        <div class="col-12">
+                            <h3 class="text-dark font-weight-bold" style="display: inline-block;"> Line Chart</h3>
+                            <h3 style="display: inline-block;"><button id="tog2"
+                                    class="btn btn-warning btn-sm ml-3">FadeIn/FadeOut</button></h3>
+                            <div id="chartBlock2" class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                                <canvas id="myChart2" style="background-color:gainsboro"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+    </div>
+    </section>
+    </div>
+
+    <%- include("partials/footer") -%>
+
+        <script>
+
+
+
+            const ctx1 = document.getElementById('myChart1');
+            const ctx2 = document.getElementById('myChart2');
+            var chart1;
+            var chart2;
+            let data1 = '<%- JSON.stringify(data) %>'
+            let parsedData = JSON.parse(data1)
+
+
+
+            $('#tog1').click(function () {
+                $('#chartBlock1').fadeToggle()
+            })
+            $('#tog2').click(function () {
+                $('#chartBlock2').fadeToggle()
+            })
+
+
+            $('#submitBtn').click(function () {
+
+                if (chart1 != null) {
+                    chart1.destroy()
+                }
+                if (chart2 != null) {
+                    chart2.destroy()
+                }
+
+                $('#loading').show();
+                let gender = $('#gender').val()
+                let martialStatus = $('#martialStatus').val()
+                trainingModel(gender, martialStatus)
+
+            })
+
+            function drawGraph(data, labels) {
+
+                var dataObj = {
+                    labels: labels,
+                    datasets: [{
+                        borderColor: "black",
+                        label: "Employees",
+                        backgroundColor: ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850", "#34d8eb", "#00bfff", "#bf00ff", "#ffbf00", "#ffb3b3", "#1C9151", "#73911C", "#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850", "#34d8eb", "#00bfff", "#bf00ff", "#ffbf00", "#ffb3b3", "#1C9151", "#73911C"],
+                        data: data
+                    }]
+                }
+                var optionsObj = {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                fontSize: 20,
+                                fontColor: "black"
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                fontSize: 16,
+                                fontColor: 'black'
+                            }
+                        }]
+
+                    },
+                    maintainAspectRatio: false,
+                    title: {
+                        display: true,
+                        text: $("#analyticsType").val() + "  count"
+                    }
+                }
+
+                chart1 = new Chart(ctx1, {
+                    type: 'bar',
+                    data: dataObj,
+                    options: optionsObj
+                });
+
+                chart2 = new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            fill: false,
+                            label: "Confidence Level",
+                            backgroundColor: "black",
+                            borderColor: "red",
+                            data: data
+                        }]
+                    },
+                    options: optionsObj
+                });
+
+                $('#loading').hide()
+                $('#loadingPanel').hide()
+                $('#graphContainer').show()
+            }
+
+
+            $('#manager1').change(function () {
+                let key = this.value
+                $('#manager2 option').show()
+                $('#manager2 option').each(function () {
+                    if (key == this.value) {
+                        $(this).hide()
+                    }
+                })
+            })
+
+
+            $('#manager2').change(function () {
+                let key = this.value
+                $('#manager1 option').show()
+                $('#manager1 option').each(function () {
+                    if (key == this.value) {
+                        $(this).hide()
+                    }
+                })
+            })
+
+
+
+
+
+            function trainingModel(gender, martialStatus) {
+
+                const options = {
+                    task: 'classification',
+                    debug: true
+                }
+
+
+                const nn = ml5.neuralNetwork(options);
+
+
+                parsedData.forEach(item => {
+                    const inputs = {
+                        gender: item.Sex,
+                        martialStatus: item.MaritalDesc,
+
+                    };
+                    const output = {
+                        performanceScore: item.PerformanceScore
+                    };
+
+                    nn.addData(inputs, output);
+                });
+
+                nn.normalizeData();
+
+                const trainingOptions = {
+                    epochs: 20,
+                    batchSize: 12
+                }
+
+                nn.train(trainingOptions, finishedTraining);
+
+                function finishedTraining() {
+                    classify();
+                }
+
+                function classify() {
+                    const input = {
+                        gender: gender,
+                        martialStatus: martialStatus
+                    }
+                    nn.classify(input, handleResults);
+                }
+
+                function handleResults(error, result) {
+                    if (error) {
+                        console.error(error);
+                        return;
+                    }
+                    let graphData = []
+                    let graphLabels = []
+                    for (let x of result) {
+                        graphData.push(x.confidence * 100)
+                        graphLabels.push(x.label + " (in %)")
+                    }
+                    drawGraph(graphData, graphLabels)
+                }
+                $('#tfjs-visor-container').hide()
+            }
+
+
+
+
+        </script>
+
+
+
+        </body>
+
+</html>
+
+</html>

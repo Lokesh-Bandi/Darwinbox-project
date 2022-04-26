@@ -158,7 +158,10 @@ router.get('/restore/:id', (req, res) => {
 
 
 
-router.post('/save', (req, res) => {
+router.post('/save', async(req, res) => {
+    console.log(req.body.ManagerName)
+    var managerDetails=await database.getDB().collection('ManagersDB').findOne({Manager_Name:req.body.ManagerName})
+    console.log(managerDetails)
     if (req.session.auth) {
         var empObject = {
             "Employee_Name": req.body.Employee_Name,
@@ -170,7 +173,7 @@ router.post('/save', (req, res) => {
             "DeptID": req.body.DeptID,
             "PerfScoreID": req.body.PerfScoreID,
             "FromDiversityJobFairID": req.body.FromDiversityJobFairID,
-            "Salary": req.body.Salary ?? "NA",
+            "Salary": parseInt(req.body.Salary) ?? "NA",
             "Termd": req.body.Termd,
             "PositionID": req.body.PositionID,
             "Position": req.body.Position,
@@ -188,11 +191,11 @@ router.post('/save', (req, res) => {
             "EmploymentStatus": req.body.EmploymentStatus,
             "Department": req.body.Department,
             "ManagerName": req.body.ManagerName,
-            "ManagerID": req.body.ManagerID,
+            "ManagerID": parseInt(managerDetails._id),
             "RecruitmentSource": req.body.RecruitmentSource,
             "PerformanceScore": req.body.PerformanceScore,
             "EngagementSurvey": req.body.EngagementSurvey,
-            "EmpSatisfaction": req.body.EmpSatisfaction,
+            "EmpSatisfaction": parseInt(req.body.EmpSatisfaction),
             "SpecialProjectsCount": req.body.SpecialProjectsCount,
             "LastPerformanceReview_Date": req.body.LastPerformanceReview_Date,
             "DaysLateLast30": req.body.DaysLateLast30,

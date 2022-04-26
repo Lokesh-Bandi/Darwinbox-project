@@ -4,6 +4,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
 const { v4: uuidv4 } = require('uuid');
+var brain = require('./routes/ml')
 
 
 var chartsJS = require('./routes/chartsJS')
@@ -22,8 +23,8 @@ app.use(logger('tiny'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));  //to use the req.body variable when the html form is submitted
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname,'public')));
-app.use("/home",express.static(path.join(__dirname,'public')));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use("/home", express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs')
 app.set('trust proxy', 1) // trust first proxy
 app.use(session({
@@ -58,6 +59,9 @@ app.use('/tasks', tasks)
 
 
 
+app.get('/brain', (req, res) => {
+    console.log(brain.output)
+})
 
 app.post('/validateEmail/:id', (req, res) => {
 
@@ -117,8 +121,14 @@ app.post("/validateIDs", (req, res) => {
     })
 })
 
-app.get("/",(req,res)=>{
-    res.render('login')
+app.get("/", (req, res) => {
+    if (req.session.auth) {
+        res.redirect('/home')
+    }
+    else {
+        res.render('login')
+    }
+
 })
 
 app.get('/home', (req, res) => {
@@ -128,6 +138,22 @@ app.get('/home', (req, res) => {
     else {
         res.render('unauthorized')
     }
+})
+
+
+app.get('/ml_page', async(req,res)=>{
+    let data;
+    try {
+        data=await database.getDB().collection('EmployeeDetails').find({},{projection:{_id:0,Sex:1,MaritalDesc:1,PerformanceScore:1}}).toArray()
+    } 
+    catch (error) {
+        console.log(error)
+    }
+    res.render('ml5',{data:data,name:req.session.name})
+})
+app.get('/Managers_Analytics_Page', async (req, res) => {
+    var managersDetails = await database.getDB().collection('ManagersDB').find({}).toArray()
+    res.render('managersAnalysis', { name: req.session.name, managers: managersDetails })
 })
 
 app.get('/deptartment_Analytics_Page', (req, res) => {
@@ -146,44 +172,15 @@ app.get('/trash', async (req, res) => {
     res.render('index', { tableArray: trashbinData, name: req.session.name, mode: "trashbin" })
 })
 
-app.get('/form', (req, res) => {
+app.get('/form', async (req, res) => {
     if (req.session.auth == true) {
 
-        var deptPromise = new Promise((resolve, reject) => {
-            database.getDB().collection('DepartmentsDB').find({}).toArray((err, res1) => {
-                if (err) {
-                    reject(err)
-                }
-                else {
-                    resolve(res1)
-                }
-            })
-        })
-        var positionPromise = new Promise((resolve, reject) => {
-            database.getDB().collection('Positions DB').find({}).toArray((err, res1) => {
-                if (err) {
-                    reject(err)
-                }
-                else {
-                    resolve(res1)
-                }
-            })
-        })
-        var empIDPromise = new Promise((resolve, reject) => {
-            database.getDB().collection('EmployeeDetails').find({}).sort({ EmpID: -1 }).limit(1).toArray((err, res1) => {
-                if (err) {
-                    reject(err)
-                }
-                else {
-                    resolve(res1[0].EmpID + 1)
-                }
-
-            })
-        })
-        Promise.all([deptPromise, positionPromise, empIDPromise]).then((val) => {
-            res.render('form', { name: req.session.name, "EmpID": val[2], mode: "newForm", depts: val[0], positions: val[1] })
-        })
-
+        var deptDetails = await database.getDB().collection('DepartmentsDB').find({}).toArray()
+        var positionDetails = await database.getDB().collection('Positions DB').find({}).toArray()
+        var managersDetails = await await database.getDB().collection('ManagersDB').find({}).toArray()
+        console.log(managersDetails)
+        var lastEmpID = await database.getDB().collection('EmployeeDetails').find({}).sort({ EmpID: -1 }).limit(1).toArray()
+        res.render('form', { name: req.session.name, EmpID: lastEmpID[0].EmpID + 1, mode: "newForm", depts: deptDetails, positions: positionDetails, managers: managersDetails })
 
     }
     else {
@@ -206,13 +203,13 @@ app.get('/data', (req, res) => {
 
 
 app.post('/unauthorized', (req, res) => {
-    res.redirect('/login')
+    res.redirect('/')
 })
 
 
 app.get('/logout', (req, res) => {
     req.session.destroy(function () {
-        res.redirect('/login')
+        res.redirect('/')
     })
 })
 

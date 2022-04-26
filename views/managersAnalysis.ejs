@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include("partials/header") -%>
+
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="#" class="brand-link">
+            <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+                style="opacity: .8">
+            <span class="brand-text font-weight-light">Analytics</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar user panel (optional) -->
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="image">
+                    <img src="images/user.png" class="img-circle elevation-2" alt="User Image">
+                </div>
+                <div class="info">
+                    <a href="#" class="d-block">
+                        <%= name %>
+                    </a>
+                </div>
+            </div>
+
+            <!-- SidebarSearch Form -->
+            <div class="form-inline">
+                <div class="input-group" data-widget="sidebar-search">
+                    <input class="form-control form-control-sidebar" type="search" placeholder="Search"
+                        aria-label="Search">
+                    <div class="input-group-append">
+                        <button class="btn btn-sidebar">
+                            <i class="fas fa-search fa-fw"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+    </aside>
+
+    <div class="content-wrapper">
+        <section class="content">
+            <div class="container-fluid">
+                <div class="jumbotron jumbotron-fluid bg-secondary">
+                    <div class="container">
+                        <h1 class="display-4 font-weight-bold">Analytics</h1>
+                        <p class="lead font-weight-bold">Based on the Human Resource Data of an Organization</p>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-4 align-self-end">
+                            <form>
+                                <label for="manager1">Select Manager 1</label>
+                                <select id="manager1" name="manager1" class="form-control">
+                                    <option value="None">None</option>
+                                    <% for(var x of managers){ %>
+                                        <option value="<%= x.Manager_Name %>">
+                                            <%= x.Manager_Name %>
+                                        </option>
+                                        <% } %>
+                                </select>
+                            </form>
+                        </div>
+                        <div class="col-4 align-self-end">
+                            <form>
+                                <label for="manager2">Select Manager 2</label>
+                                <select id="manager2" name="manager2" class="form-control">
+                                    <option value="None">None</option>
+                                    <% for(var x of managers){ %>
+                                        <option value="<%= x.Manager_Name %>">
+                                            <%= x.Manager_Name %>
+                                        </option>
+                                        <% } %>
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center mt-2">
+                        <div class="col-3 align-self-end">
+                            <small id="errMsg" class="text-danger font-weight-bold"></small>
+                            <button type="button" id="submitBtn" class="btn btn-primary btn-block">Do Analysis</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="graphContainer" class="container mt-5" style="display: none;">
+                    <div class="row justify-content-center">
+                        <div class="col-12">
+                            <h3 class="text-dark font-weight-bold" style="display: inline-block;"> Bar Graph</h3>
+                            <h3 style="display: inline-block;"><button id="tog1"
+                                    class="btn btn-warning btn-sm ml-3">FadeIn/FadeOut</button></h3>
+                            <div id="chartBlock1" class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                                <canvas id="myChart1" style="background-color:gainsboro"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center mt-5">
+                        <div class="col-12">
+                            <h3 class="text-dark font-weight-bold" style="display: inline-block;"> Line Chart</h3>
+                            <h3 style="display: inline-block;"><button id="tog2"
+                                    class="btn btn-warning btn-sm ml-3">FadeIn/FadeOut</button></h3>
+                            <div id="chartBlock2" class="card card-body" style="height: 30rem;background-color:#c5d4ed">
+                                <canvas id="myChart2" style="background-color:gainsboro"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+    </div>
+    </section>
+    </div>
+
+    <%- include("partials/footer") -%>
+
+        <script>
+
+            $('#tog1').click(function () {
+                $('#chartBlock1').fadeToggle()
+            })
+            $('#tog2').click(function () {
+                $('#chartBlock2').fadeToggle()
+            })
+
+            const ctx1 = document.getElementById('myChart1');
+            const ctx2 = document.getElementById('myChart2');
+            var chart1;
+            var chart2;
+
+            $('#submitBtn').click(function () {
+                if (chart1 != null) {
+                    chart1.destroy()
+                }
+                if (chart2 != null) {
+                    chart2.destroy()
+                }
+                $.ajax({
+                    url: "/charts/managerAnalysis",
+                    method: "get",
+                    dataType: "json",
+                    data: {
+                        manager1: $('#manager1').val(),
+                        manager2: $('#manager2').val()
+                    },
+                    success: function (res) {
+                        if(res.msg=="Success"){
+                            drawGraph(res.emp1, res.emp2, res.labels, res.empName1, res.empName2)
+                        }
+                        else{
+                            $('#errMsg').text(res.msg)
+                        }
+                    },
+                    error: function () {
+                        alert("Server not responding")
+                    }
+                })
+            })
+
+            function drawGraph(data1, data2, labels, name1, name2) {
+
+                var dataValues = []
+                var labels = labels
+
+                var dataObj = {
+                    labels: labels,
+                    datasets: [
+                        {
+                            fill: false,
+                            label: name1,
+                            backgroundColor: "#a85654",
+                            borderColor: "red",
+                            data: data1
+                        }, {
+                            fill: false,
+                            label: name2,
+                            backgroundColor: "#818a3b",
+                            borderColor: "green",
+                            data: data2
+                        }
+
+                    ]
+                }
+                var optionsObj = {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                fontSize: 20,
+                                fontColor: "black"
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                fontSize: 16,
+                                fontColor: 'black'
+                            }
+                        }]
+
+                    },
+                    maintainAspectRatio: false,
+                    title: {
+                        display: true,
+                        text: $("#analyticsType").val() + "  count"
+                    }
+                }
+
+                chart1 = new Chart(ctx1, {
+                    type: 'bar',
+                    data: dataObj,
+                    options: optionsObj
+                });
+
+                chart2 = new Chart(ctx2, {
+                    type: 'line',
+                    data: dataObj,
+                    options: optionsObj
+                });
+
+
+                $('#graphContainer').show()
+            }
+
+
+            $('#manager1').change(function () {
+                let key=this.value
+                $('#manager2 option').show()
+                $('#manager2 option').each(function () {
+                    if(key==this.value){
+                        $(this).hide()
+                    }
+                })
+            })
+            $('#manager2').change(function () {
+                let key=this.value
+                $('#manager1 option').show()
+                $('#manager1 option').each(function () {
+                    if(key==this.value){
+                        $(this).hide()
+                    }
+                })
+            })
+        </script>
+
+
+
+        </body>
+
+</html>
